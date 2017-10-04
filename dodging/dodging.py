@@ -1,22 +1,22 @@
-import pygame
+import pygame, time
 from random import randint
-
-balls = {}
-rect = []
-running = True
-speed = 7
-size = 50
-step = 10
-width = 1025
-height = 770
-n_balls = 2
-move_x = move_y = 0
-x = width / 2
-y = width / 2
 
 
 def init():
-    global balls, clock, display
+    global balls, clock, display, start_time, rect, running, speed, size, step, width, height, n_balls, move_x, move_y, x, y
+    balls = {}
+    rect = []
+    running = True
+    speed = 7
+    size = 50
+    step = 10
+    width = 1025
+    height = 770
+    n_balls = 10
+    move_x = move_y = 0
+    x = width / 2
+    y = height / 2
+    start_time = time.time()
     x = 0
     while x < n_balls:
         x += 1
@@ -117,12 +117,19 @@ def bounce():
     player = pygame.draw.rect(display, (255, 0, 0), (x, y, size, size))
 
 
-def time():
+def show_time():
+    global time
     basicfont = pygame.font.SysFont(None, 72)
-    text = basicfont.render(str(round(pygame.time.get_ticks() / 1000)), True, (255, 0, 0), (0, 0, 0))
+    text = basicfont.render(str(round(game_time)), True, (255, 0, 0), (0, 0, 0))
+
     textrect = text.get_rect()
     textrect.centerx = display.get_rect().centerx
     display.blit(text, textrect)
+
+
+def get_time():
+    global game_time, start_time
+    game_time = time.time() - start_time
 
 
 def smash():
@@ -139,13 +146,14 @@ def main():
         move()
         bounce()
         keyboard()
-        time()
+        get_time()
+        show_time()
         smash()
         pygame.display.update()
         rect = []
         clock.tick(60)
         rect = []
-    print("Score:", round(pygame.time.get_ticks() / 1000))
+    print("Score:", game_time)
     pygame.quit()
 
 

@@ -12,7 +12,7 @@ def init():
     step = 10
     width = 1025
     height = 770
-    n_balls = 10
+    n_balls = 6
     move_x = move_y = 0
     x = width / 2
     y = height / 2
@@ -106,7 +106,9 @@ def bounce():
             balls[item] = balls[item][0] + step, balls[item][1], 0
         elif balls[item][1] <= 0:
             balls[item] = balls[item][0] - step, balls[item][1], 2
-    if x >= width - size:
+    if x >= width - size or x<=0 and y >= height - size or y <= 0:
+        x = y = 0
+    elif x >= width - size:
         x = width - size
     elif x <= 0:
         x = 0
@@ -121,7 +123,6 @@ def show_time():
     global time
     basicfont = pygame.font.SysFont(None, 72)
     text = basicfont.render(str(round(game_time)), True, (255, 0, 0), (0, 0, 0))
-
     textrect = text.get_rect()
     textrect.centerx = display.get_rect().centerx
     display.blit(text, textrect)
@@ -137,10 +138,10 @@ def smash():
     for item in rect:
         if player.colliderect(item):
             running = False
+    rect = []
 
 
 def main():
-    global rect
     init()
     while running:
         move()
@@ -150,9 +151,7 @@ def main():
         show_time()
         smash()
         pygame.display.update()
-        rect = []
         clock.tick(60)
-        rect = []
     print("Score:", game_time)
     pygame.quit()
 

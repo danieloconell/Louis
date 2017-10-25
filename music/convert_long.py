@@ -1,4 +1,4 @@
-import os, csv, threading
+import os, csv, threading, subprocess
 
 tempo = 96
 
@@ -7,7 +7,7 @@ def write_music(music1, length):
 1, 0, Start_track
 1, 0, Title_t, "Test"
 1, 0, Time_signature, 3, 3, 96, 8
-1, 0, Tempo, 1500000
+1, 0, Tempo, 300000
 1, 0, End_track
 2, 0, Start_track
 2, 0, Instrument_name_t, "Church Organ"
@@ -39,6 +39,7 @@ def run(file):
 
         for row in reader:
             music = row
+        print(music)
 
         for time, notes in enumerate(music, start=1):
             for note in notes:
@@ -53,7 +54,7 @@ def run(file):
                     playing = playing.replace(note, "")
                     output.append(write_line(time, note, "Note_off_c"))
 
-        with open(""+"long-"+file, 'w') as myfile:
+        with open(""+file+"short", 'w') as myfile:
             music_str = ""
             for i in output:
                 music_str += i+"\n"
@@ -63,10 +64,13 @@ def run(file):
             name = myfile.name
             new_name = name.split(".csv")[0]
 
-            os.system("csvmidi "+name+" output/"+new_name+".mid")
+            # os.system("csvmidi "+name+" output/"+new_name+".mid")
+            subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])
 
 
 def start(files):
     for i in files:
         t = threading.Thread(target=run, args=(i,))
         t.start()
+
+start(["total.csv"])

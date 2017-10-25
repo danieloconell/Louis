@@ -46,8 +46,10 @@ X = X / float(n_vocab)
 y = np_utils.to_categorical(dataY)
 
 model = Sequential()
-model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2])))
-model.add(Dropout(0.2))  # Randomly deactivates certain neurons to prevent over fitting
+model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
+model.add(Dropout(0.2))
+model.add(LSTM(256))
+model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
 
 
@@ -62,7 +64,7 @@ def learn():
 
 
 def create():
-    filename = "weights/weights--04-3.3226.hdf5"
+    filename = "weights/weights--49-0.4690.hdf5"
     model.load_weights(filename)
     model.compile(loss='categorical_crossentropy', optimizer='adam')
 
@@ -95,7 +97,6 @@ def to_csv(a):
         w.writerow(data)
 
 if __name__ == "__main__":
-    error = "\nUsage: lstm.py [action] \nlearn/ create"
     if sys.argv[1] == "learn":
         learn()
     elif sys.argv[1] == "create":

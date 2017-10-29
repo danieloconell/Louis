@@ -1,4 +1,4 @@
-import os, csv, threading, subprocess
+import os, csv, threading, subprocess, sys
 
 tempo = 96
 
@@ -63,12 +63,11 @@ def run(file):
             myfile.write(write_music(music_str, get_length(output)))
             
             name = myfile.name
-            new_name = name.split(".csv")[0]
 
             try:
-                os.system("csvmidi "+name+" "+new_name+".mid")
+                subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])                
             except:
-                subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])
+                os.system("csvmidi "+name+" "+new_name+".mid")
 
 
 def start(files):
@@ -77,4 +76,4 @@ def start(files):
         t.start()
 
 
-start(["data/sonata-beethoven/short/short-ps01_01.csv"])
+start(sys.argv[1:])

@@ -1,4 +1,4 @@
-import os, csv, pprint, threading
+import os, csv, pprint, threading, sys
 
 
 def to_beats(time, tempo):
@@ -7,6 +7,7 @@ def to_beats(time, tempo):
 
 def to_char(num):
     return chr(int(num))
+
 
 def run(file):
     print(file)
@@ -46,10 +47,12 @@ def run(file):
             wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
             wr.writerow(music)
 
-    # pprint.pprint(music)
 
 
 def start(files):
     for i in files:
         t = threading.Thread(target=run, args=(i,))
         t.start()
+
+
+start(sys.argv[1:])

@@ -94,6 +94,7 @@ def to_midi(a, name):
         w = csv.writer(f)
         w.writerow(data)
         convert_long.start(f.name)
+        print("\nDone!")
 
 
 if __name__ == "__main__":

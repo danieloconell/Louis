@@ -15,8 +15,8 @@ with open("data.csv") as f:
     r = csv.reader(f)
     for row in r:
         for timestep in row:
-            data = data + timestep + " "# chr(4000)  # to differentiate timesteps
-print(data)
+            data = data + timestep + chr(4000)  # to differentiate timesteps
+
 chars = sorted(list(set(data)))
 VOCAB_SIZE = len(chars)
 

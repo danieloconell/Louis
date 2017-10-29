@@ -7,22 +7,21 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 import csv
 import sys
+import convert_long
 
 data = ""
-with open("data\sonata-beethoven\short\short-ps01_01.csv") as f:
+with open("data.csv") as f:
     print("Reading from", f.name)
     r = csv.reader(f)
     for row in r:
-        for item in row:
-            for note in item:
-                data = data + item
-            data = data + chr(4000) # to differentiate timesteps
-
+        for timestep in row:
+            data = data + timestep + " "# chr(4000)  # to differentiate timesteps
+print(data)
 chars = sorted(list(set(data)))
 VOCAB_SIZE = len(chars)
 
-char_to_int = dict((c, i) for i, c in enumerate(chars)) # map each chr to int accessible by char
-int_to_char = dict((i, c) for i, c in enumerate(chars)) # accessible by int
+char_to_int = dict((c, i) for i, c in enumerate(chars))  # map each chr to int accessible by char
+int_to_char = dict((i, c) for i, c in enumerate(chars))  # accessible by int
 
 n_chars = len(data)
 n_vocab = len(chars)
@@ -63,8 +62,7 @@ def learn():
     model.fit(X, y, epochs=5, batch_size=128, callbacks=callbacks_list) # Fit network to data
 
 
-def create():
-    filename = "weights/weights--49-0.4690.hdf5"
+def create(filename):
     model.load_weights(filename)
     model.compile(loss='categorical_crossentropy', optimizer='adam')
 
@@ -86,18 +84,20 @@ def create():
 
         final.append(result)
 
-    to_csv(final)
+    to_midi(final, "output")
 
 
-def to_csv(a):
+def to_midi(a, name):
     a_str = "".join(a)
     data = a_str.split(chr(4000))
-    with open("output.csv", "w") as f:
+    with open(str(name)+".csv", "w") as f:
         w = csv.writer(f)
         w.writerow(data)
+        convert_long.start(f.name)
+
 
 if __name__ == "__main__":
     if sys.argv[1] == "learn":
         learn()
     elif sys.argv[1] == "create":
-        create()
+        create(sys.argv[2])

@@ -2,6 +2,7 @@ import os, csv, threading, subprocess
 
 tempo = 96
 
+
 def write_music(music1, length):
     return '''0, 0, Header, 1, 2, 480
 1, 0, Start_track
@@ -27,6 +28,7 @@ def get_length(music1):
     a = music1[len(music1)-1]
     a = a.split(",")[1]
     return a
+
 
 def run(file):
     print(file)
@@ -64,13 +66,13 @@ def run(file):
             name = myfile.name
             new_name = name.split(".csv")[0]
 
-            # os.system("csvmidi "+name+" output/"+new_name+".mid")
-            subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])
+            try:
+                os.system("csvmidi "+name+" output/"+new_name+".mid")
+            except:
+                subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])
 
 
 def start(files):
     for i in files:
         t = threading.Thread(target=run, args=(i,))
         t.start()
-
-start(["total.csv"])

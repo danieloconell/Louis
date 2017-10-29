@@ -21,7 +21,7 @@ def write_line(time, note, action):
     time_native = time * tempo
     note_num = ord(note)
 
-    return ("2, "+str(time_native)+", "+action+", 0, "+str(note_num)+", 82") 
+    return ("2, "+str(time_native)+", "+action+", 0, "+str(note_num)+", 127")
 
 
 def get_length(music1):
@@ -40,15 +40,14 @@ def run(file):
         playing = ""
 
         for row in reader:
-            music = row
-        print(music)
+            music += row
 
         for time, notes in enumerate(music, start=1):
             for note in notes:
                 if note in playing:
-                    output.append(write_line(time, note, "Note_on_c"))
                     continue
                 else:
+                    output.append(write_line(time, note, "Note_on_c"))
                     playing += note
 
             for note in playing:
@@ -67,7 +66,7 @@ def run(file):
             new_name = name.split(".csv")[0]
 
             try:
-                os.system("csvmidi "+name+" output/"+new_name+".mid")
+                os.system("csvmidi "+name+" "+new_name+".mid")
             except:
                 subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])
 
@@ -76,3 +75,6 @@ def start(files):
     for i in files:
         t = threading.Thread(target=run, args=(i,))
         t.start()
+
+
+start(["data/sonata-beethoven/short/short-ps01_01.csv"])

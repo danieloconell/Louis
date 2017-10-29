@@ -11,6 +11,15 @@ screen_width = 38
 screen_height = 14
 n_actions = 2
 observation = []
+interval = 1
+
+
+def make(type):
+    """Chose whether the environment is text or in pygame."""
+    if type == "pygame":
+        None
+    elif type == "text":
+        None
 
 
 def reset():
@@ -43,25 +52,23 @@ def action(action):
         player = player
     elif action == 0:
         old_player = player
-        player -= 1
+        player -= interval
     elif action == 1:
         old_player = player
-        player += 1
+        player += interval
+    elif action == 2:
+        old_player = player + 2
+        player = player
     else:
         print("Invalid action")
 
 
-def render():
-    """Render everything that needs to be drawn."""
-    global object, old_object, old_player, player, screen, screen_height
-    global screen_width, observation, done, reward
-
-    # gravity, make the object fall down one square at a time
+def gravity():
+    """Make the object fall and update the player location."""
+    global old_object, object, done, observation
     old_object = []
     old_object.extend([object[0], object[1]])
     if object[1] == screen_height - 1:
-        print("Episode over")
-        reset()
         done = True
     else:
         object[1] += 1
@@ -77,6 +84,15 @@ def render():
     # draw object and remove old object
     screen[object[1]][object[0]] = "0"
     screen[old_object[1]][old_object[0]] = " "
+
+
+def render():
+    """Render everything that needs to be drawn."""
+    global object, old_object, old_player, player, screen, screen_height
+    global screen_width, observation, done, reward
+
+    # gravity
+    gravity()
 
     # draw what is in the screen array
     index_1 = 0
@@ -95,6 +111,40 @@ def render():
             print(item, end="")
     print("#", end="\n")
     print("#" * (screen_width + 2))
+
+
+def create_reward(action):
+    """Return the reward based on an action."""
+    global reward, player, object
+
+    # if player move in direction of object, increase reward
+    if action == 0:
+        other_action = 1
+        action_1_difference = object[0] - player + action
+        action_2_difference = object[0] - player + other_action
+    elif action == 1:
+        other_action = 0
+        action_1_difference = object[0] - player + action
+        action_2_difference = object[0] - player + other_action
+    elif action == 2:
+        if object[0] == player:
+            reward += 15
+        return reward
+
+    if action_1_difference < 0:
+        action_1_difference = action_1_difference * -1
+    elif action_2_difference < 0:
+        action_2_difference = action_2_difference * -1
+
+    # if player is at the location of the object
+    if player == object[0]:
+        reward += 15
+    elif action_1_difference > action_2_difference:
+        reward += 1
+    else:
+        reward = 0
+
+    return reward
 
 
 def sample_action():

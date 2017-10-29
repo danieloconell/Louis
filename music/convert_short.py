@@ -8,14 +8,6 @@ def to_beats(time, tempo):
 def to_char(num):
     return chr(int(num))
 
-
-files = os.listdir()
-files.remove('convert.py')
-files.remove('mass_csv.py')
-files.remove("midi")
-files.remove("short")
-
-
 def run(file):
     print(file)
     with open(file, encoding="utf-8", errors="replace") as f:
@@ -50,13 +42,14 @@ def run(file):
             music.append(playing)
             f.seek(0)
 
-        with open("short/"+"short-"+file, 'w') as myfile:
+        with open(""+file, 'w') as myfile:
             wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
             wr.writerow(music)
 
     # pprint.pprint(music)
 
 
-for i in files:
-    t = threading.Thread(target=run, args=(i,))
-    t.start()
+def start(files):
+    for i in files:
+        t = threading.Thread(target=run, args=(i,))
+        t.start()

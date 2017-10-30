@@ -6,15 +6,16 @@ from keras.layers import LSTM
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 import csv
-import sys
 import convert_long
+from tqdm import tqdm
+import argparse
 
 data = ""
 with open("data.csv") as f:
     print("Reading from", f.name)
     r = csv.reader(f)
     for row in r:
-        for timestep in row:
+        for timestep in tqdm(row):
             data = data + timestep + chr(4000)  # to differentiate timesteps
 
 chars = sorted(list(set(data)))
@@ -32,7 +33,9 @@ print("Total Vocab:", n_vocab)
 seq_length = 100
 dataX = []
 dataY = []
-for i in range(0, n_chars - seq_length, 1):
+
+print("\nConverting Data")
+for i in tqdm(range(0, n_chars - seq_length, 1)):
     seq_in = data[i:i + seq_length]
     seq_out = data[i + seq_length]
     dataX.append([char_to_int[char] for char in seq_in])
@@ -72,7 +75,8 @@ def create(filename):
     print(''.join([int_to_char[value] for value in pattern]))
 
     final = []
-    for i in range(10000):
+    print("\nCreating Music")
+    for i in tqdm(range(10000)):
         x = numpy.reshape(pattern, (1, len(pattern), 1))
         x = x / float(n_vocab)
         prediction = model.predict(x, verbose=0)
@@ -84,7 +88,7 @@ def create(filename):
 
         final.append(result)
 
-    to_midi(final, "output")
+    to_midi(final, "output"+str(i))
 
 
 def to_midi(a, name):
@@ -93,12 +97,19 @@ def to_midi(a, name):
     with open(str(name)+".csv", "w") as f:
         w = csv.writer(f)
         w.writerow(data)
-        convert_long.start(f.name)
+        convert_long.start([f.name])
         print("\nDone!")
 
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument("Action", help="Action to perform, learn or create")
+parser.add_argument('--file', '-f', type=str, help="weights for creating")
+
+args = parser.parse_args()
+
 if __name__ == "__main__":
-    if sys.argv[1] == "learn":
-        learn()
-    elif sys.argv[1] == "create":
-        create(sys.argv[2])
+    if args.Action == "learn":
+       learn()
+    elif args.Action == "create":
+       create(args.file)

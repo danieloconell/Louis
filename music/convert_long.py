@@ -74,5 +74,3 @@ def start(files):
         t = threading.Thread(target=run, args=(i,))
         t.start()
 
-
-start(sys.argv[1:])

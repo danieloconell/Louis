@@ -10,6 +10,12 @@ import convert_long
 from tqdm import tqdm
 import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument("Action", help="Action to perform, learn or create")
+parser.add_argument('--file', '-f', type=str, help="weights for creating")
+
+args = parser.parse_args()
+
 data = ""
 with open("data.csv") as f:
     print("Reading from", f.name)
@@ -100,13 +106,6 @@ def to_midi(a, name):
         convert_long.start([f.name])
         print("\nDone!")
 
-
-
-parser = argparse.ArgumentParser()
-parser.add_argument("Action", help="Action to perform, learn or create")
-parser.add_argument('--file', '-f', type=str, help="weights for creating")
-
-args = parser.parse_args()
 
 if __name__ == "__main__":
     if args.Action == "learn":

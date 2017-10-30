@@ -61,13 +61,12 @@ def run(file):
                 music_str += i+"\n"
             
             myfile.write(write_music(music_str, get_length(output)))
-            
             name = myfile.name
 
             try:
                 subprocess.call(["C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "csvmidi "+name+" "+name+".mid"])                
             except:
-                os.system("csvmidi "+name+" "+new_name+".mid")
+                os.system("csvmidi "+name+" "+name+".mid")
 
 
 def start(files):

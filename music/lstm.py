@@ -94,7 +94,7 @@ def create(filename):
 
         final.append(result)
 
-    to_midi(final, "output"+str(i))
+    to_midi(final, "output")
 
 
 def to_midi(a, name):

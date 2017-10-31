@@ -1,6 +1,6 @@
 import os, csv, threading, subprocess, sys
 
-tempo = 96
+tempo = 96 * 4
 
 
 def write_music(music1, length):

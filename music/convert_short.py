@@ -19,6 +19,7 @@ def run(file):
         for row in reader:
             if row[2] == " Time_signature":
                 tempo = int(row[5])
+                tempo = tempo * 4
                 break
 
         f.seek(0)
@@ -43,7 +44,7 @@ def run(file):
             music.append(playing)
             f.seek(0)
 
-        with open(""+file, 'w') as myfile:
+        with open(file+"short", 'w') as myfile:
             wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
             wr.writerow(music)
 
@@ -53,6 +54,3 @@ def start(files):
     for i in files:
         t = threading.Thread(target=run, args=(i,))
         t.start()
-
-
-start(sys.argv[1:])

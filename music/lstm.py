@@ -12,9 +12,15 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("Action", help="Action to perform, learn or create")
-parser.add_argument('--file', '-f', type=str, help="weights for creating")
+parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run")
+parser.add_argument('--file', '-f', type=str, help="Weights for creating")
+parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
 
 args = parser.parse_args()
+
+if args.Action.lower() != "create" or args.Action.lower() != "learn":
+    print("\nWrong Action Argument")
+    quit()
 
 data = ""
 with open("data.csv") as f:
@@ -59,22 +65,22 @@ model.add(Dropout(0.2))
 model.add(LSTM(256))
 model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
+if args.file:
+    model.load_weights(args.file)
+
+model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 
 def learn():
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
-
+    print("\n")
     file_path ="weights/weights--{epoch:02d}-{loss:.4f}.hdf5"
     checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
     callbacks_list = [checkpoint]
 
-    model.fit(X, y, epochs=5, batch_size=128, callbacks=callbacks_list) # Fit network to data
+    model.fit(X, y, epochs=args.epochs, batch_size=128, callbacks=callbacks_list) # Fit network to data
 
 
-def create(filename):
-    model.load_weights(filename)
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
-
+def create(outputfile):
     start = numpy.random.randint(0, len(dataX) - 1)
     pattern = dataX[start]
     print("Seed:")
@@ -82,7 +88,7 @@ def create(filename):
 
     final = []
     print("\nCreating Music")
-    for i in tqdm(range(10000)):
+    for i in tqdm(range(3000)):
         x = numpy.reshape(pattern, (1, len(pattern), 1))
         x = x / float(n_vocab)
         prediction = model.predict(x, verbose=0)
@@ -94,7 +100,7 @@ def create(filename):
 
         final.append(result)
 
-    to_midi(final, "output")
+    to_midi(final, outputfile)
 
 
 def to_midi(a, name):
@@ -108,7 +114,8 @@ def to_midi(a, name):
 
 
 if __name__ == "__main__":
-    if args.Action == "learn":
+    if args.Action.lower() == "learn":
        learn()
-    elif args.Action == "create":
-       create(args.file)
+    elif args.Action.lower() == "create":
+        for i in range(1, args.num+1):
+            create(i)

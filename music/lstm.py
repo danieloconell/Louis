@@ -13,8 +13,9 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("Action", help="Action to perform, learn or create")
 parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run", default=5)
-parser.add_argument('--file', '-f', type=str, help="Weights for creating")
+parser.add_argument('--file', '-f', type=str, help="Weights for neural network")
 parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
+parser.add_argument('--length', '-l', type=int, help="Length per song", default=1)
 
 args = parser.parse_args()
 
@@ -88,7 +89,7 @@ def create(outputfile):
 
     final = []
     print("\nCreating Music")
-    for i in tqdm(range(3000)):
+    for i in tqdm(range(args.length)):
         x = numpy.reshape(pattern, (1, len(pattern), 1))
         x = x / float(n_vocab)
         prediction = model.predict(x, verbose=0)

@@ -41,7 +41,9 @@ def run(file):
                     if row[2] == " Note_off_c":
                         playing = playing.replace(to_char(row[4]), "")
 
-            music.append(playing)
+            if playing != "":
+                music.append(playing)
+                
             f.seek(0)
 
         with open(file+"short", 'w') as myfile:

@@ -15,7 +15,7 @@ parser.add_argument("Action", help="Action to perform, learn or create")
 parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run", default=5)
 parser.add_argument('--file', '-f', type=str, help="Weights for neural network")
 parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
-parser.add_argument('--length', '-l', type=int, help="Length per song", default=1)
+parser.add_argument('--length', '-l', type=int, help="Length per song", default=1000)
 
 args = parser.parse_args()
 

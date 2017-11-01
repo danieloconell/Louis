@@ -110,8 +110,9 @@ def to_midi(a, name):
     with open(str(name)+".csv", "w") as f:
         w = csv.writer(f)
         w.writerow(data)
-        convert_long.start([f.name])
-        print("\nDone!")
+        fname = f.name
+    convert_long.start([fname])
+    print("\nDone!")
 
 
 if __name__ == "__main__":

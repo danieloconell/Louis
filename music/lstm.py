@@ -12,13 +12,13 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("Action", help="Action to perform, learn or create")
-parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run")
+parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run", default=5)
 parser.add_argument('--file', '-f', type=str, help="Weights for creating")
 parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
 
 args = parser.parse_args()
 
-if args.Action.lower() != "create" or args.Action.lower() != "learn":
+if args.Action.lower() != "create" and args.Action.lower() != "learn":
     print("\nWrong Action Argument")
     quit()
 

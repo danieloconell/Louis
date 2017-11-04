@@ -10,7 +10,7 @@ from random import randint
 screen_width = 38
 screen_height = 14
 n_actions = 2
-observation = []
+observation = [0, 0, False]
 interval = 1
 
 
@@ -24,7 +24,7 @@ def make(type):
 
 def reset():
     """Reset all the necessary variables for the environment."""
-    global screen, screen_height, screen_width, object, player, reward, done
+    global screen, screen_height, screen_width, object, player, actual_reward, done
 
     print("Resetting")
 
@@ -40,7 +40,7 @@ def reset():
 
     # reset done and reward
     done = False
-    reward = 0
+    actual_reward = 0
 
 
 def action(action):
@@ -65,17 +65,17 @@ def action(action):
 
 def gravity():
     """Make the object fall and update the player location."""
-    global old_object, object, done, observation
+    global old_object, object, done, observation, actual_reward, reward
     old_object = []
     old_object.extend([object[0], object[1]])
-    if object[1] == screen_height - 1:
+    if object[1] == screen_height - 2:
         done = True
     else:
         object[1] += 1
 
     # make observation
     observation = []
-    observation.extend([[object, player], reward, done])
+    observation.extend([[object, player], actual_reward, done])
 
     # draw player and remove old player
     screen[screen_height - 1][int(player)] = "@"
@@ -89,7 +89,7 @@ def gravity():
 def render():
     """Render everything that needs to be drawn."""
     global object, old_object, old_player, player, screen, screen_height
-    global screen_width, observation, done, reward
+    global screen_width, observation, done
 
     # gravity
     gravity()
@@ -115,7 +115,17 @@ def render():
 
 def create_reward(action):
     """Return the reward based on an action."""
-    global reward, player, object
+    global player, object, actual_reward
+
+    reward = 0
+
+    if player == object[0] and action == 2:
+        reward += 15
+        return reward
+    elif player == object[0] and action == 0:
+        return reward
+    elif player == object[0] and action == 1:
+        return reward
 
     # if player move in direction of object, increase reward
     if action == 0:
@@ -127,24 +137,24 @@ def create_reward(action):
         action_1_difference = object[0] - player + action
         action_2_difference = object[0] - player + other_action
     elif action == 2:
-        if object[0] == player:
-            reward += 15
-        return reward
-
-    if action_1_difference < 0:
-        action_1_difference = action_1_difference * -1
-    elif action_2_difference < 0:
-        action_2_difference = action_2_difference * -1
+            reward = 0
+            return reward
 
     # if player is at the location of the object
-    if player == object[0]:
-        reward += 15
-    elif action_1_difference > action_2_difference:
-        reward += 1
-    else:
-        reward = 0
-
-    return reward
+    if object[0] > player:
+        if action_1_difference < action_2_difference:
+            reward += 0
+            return reward
+        else:
+            reward += 1
+            return reward
+    elif object[0] < player:
+        if action_1_difference < action_2_difference:
+            reward += 1
+            return reward
+        else:
+            reward += 0
+            return reward
 
 
 def sample_action():

@@ -50,20 +50,20 @@ def action(action):
     # if player is at one of the screen borders do not move
     if player == screen_width - 1:
         player = player
-    elif action == 0:
+    elif action == "left":
         old_player = player
         player -= interval
-    elif action == 1:
+    elif action == "right":
         old_player = player
         player += interval
-    elif action == 2:
+    elif action == "stay":
         old_player = player + 2
         player = player
     else:
         print("Invalid action")
 
 
-def gravity():
+def update():
     """Make the object fall and update the player location."""
     global old_object, object, done, observation, actual_reward, reward
     old_object = []
@@ -91,8 +91,8 @@ def render():
     global object, old_object, old_player, player, screen, screen_height
     global screen_width, observation, done
 
-    # gravity
-    gravity()
+    # update
+    update()
 
     # draw what is in the screen array
     index_1 = 0
@@ -119,24 +119,26 @@ def create_reward(action):
 
     reward = 0
 
-    if player == object[0] and action == 2:
-        reward += 15
+    if player == object[0] and action == "stay":
+        reward += 1
         return reward
-    elif player == object[0] and action == 0:
+    elif player == object[0] and action == "left":
         return reward
-    elif player == object[0] and action == 1:
+    elif player == object[0] and action == "right":
         return reward
 
     # if player move in direction of object, increase reward
-    if action == 0:
+    if action == "left":
+        action = 0
         other_action = 1
         action_1_difference = object[0] - player + action
         action_2_difference = object[0] - player + other_action
-    elif action == 1:
+    elif action == "right":
+        action = 1
         other_action = 0
         action_1_difference = object[0] - player + action
         action_2_difference = object[0] - player + other_action
-    elif action == 2:
+    elif action == "stay":
             reward = 0
             return reward
 

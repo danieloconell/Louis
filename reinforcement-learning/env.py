@@ -5,8 +5,11 @@ In which the aim is to catch falling objects.
 """
 
 from random import randint
+import pygame
 
 # global variables for environemt
+actions = ["left", "right", "stay"]
+block = 25
 screen_width = 38
 screen_height = 14
 n_actions = 2
@@ -14,12 +17,18 @@ observation = [0, 0, False]
 interval = 1
 
 
-def make(type):
+def make(env):
     """Chose whether the environment is text or in pygame."""
-    if type == "pygame":
-        None
-    elif type == "text":
-        None
+    global type, display
+    if env == "pygame":
+        pygame.init()
+        width = block * (screen_width + 2)
+        height = block * (screen_height + 2)
+        display = pygame.display.set_mode([width, height])
+        print("hi")
+        type = "pygame"
+    elif env == "text":
+        type = "text"
 
 
 def reset():
@@ -89,28 +98,43 @@ def update():
 def render():
     """Render everything that needs to be drawn."""
     global object, old_object, old_player, player, screen, screen_height
-    global screen_width, observation, done
+    global screen_width, observation, done, type, display
 
     # update
     update()
 
-    # draw what is in the screen array
-    index_1 = 0
+    index = 0
     index_2 = 0
 
-    print("#" * (screen_width + 2))
-    for row in screen:
-        index_1 += 1
-        for item in row:
-            if index_2 == 38:
-                print("#")
-                index_2 = 0
-            if index_2 == 0:
-                print("#", end="")
+    if type == "text":
+        print("#" * (screen_width + 2))
+        for row in screen:
+            for item in row:
+                if index == 38:
+                    print("#")
+                    index = 0
+                if index == 0:
+                    print("#", end="")
+                index += 1
+                print(item, end="")
+        print("#", end="\n")
+        print("#" * (screen_width + 2))
+    elif type == "pygame":
+        for row in screen:
             index_2 += 1
-            print(item, end="")
-    print("#", end="\n")
-    print("#" * (screen_width + 2))
+            for item in row:
+                if index == 38:
+                    index = 0
+                elif index == 0:
+                    None
+                index += 1
+                if item == " ":
+                    pygame.draw.rect(display, (255, 0, 0), (block * index, block * index_2, block, block))
+                elif item == "0":
+                    pygame.draw.rect(display, (255, 0, 255), (block * index, block * index_2, block, block))
+                elif item == "@":
+                    pygame.draw.rect(display, (255, 255, 255), (block * index, block * index_2, block, block))
+        pygame.display.update()
 
 
 def create_reward(action):

@@ -1,7 +1,8 @@
 """This is the agent which currently takes the action with highest immediate reward."""
 
 import env
-env.make("text")
+import time
+env.make("pygame")
 
 for episode in range(10):
     env.reset()

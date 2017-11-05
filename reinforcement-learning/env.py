@@ -10,7 +10,7 @@ import pygame
 # global variables for environemt
 actions = ["left", "right", "stay"]
 block = 25
-screen_width = 38
+screen_width = 28
 screen_height = 14
 n_actions = 2
 observation = [0, 0, False]
@@ -25,10 +25,12 @@ def make(env):
         width = block * (screen_width + 2)
         height = block * (screen_height + 2)
         display = pygame.display.set_mode([width, height])
-        print("hi")
+        display.fill((96, 96, 96))
         type = "pygame"
     elif env == "text":
         type = "text"
+    else:
+        print("Invalid environment type")
 
 
 def reset():
@@ -66,7 +68,7 @@ def action(action):
         old_player = player
         player += interval
     elif action == "stay":
-        old_player = player + 2
+        old_player = player - 1
         player = player
     else:
         print("Invalid action")
@@ -110,7 +112,7 @@ def render():
         print("#" * (screen_width + 2))
         for row in screen:
             for item in row:
-                if index == 38:
+                if index == screen_width:
                     print("#")
                     index = 0
                 if index == 0:
@@ -123,17 +125,17 @@ def render():
         for row in screen:
             index_2 += 1
             for item in row:
-                if index == 38:
+                if index == screen_width:
                     index = 0
                 elif index == 0:
                     None
                 index += 1
                 if item == " ":
-                    pygame.draw.rect(display, (255, 0, 0), (block * index, block * index_2, block, block))
+                    pygame.draw.rect(display, (236, 236, 236), (block * index, block * index_2, block, block))
                 elif item == "0":
-                    pygame.draw.rect(display, (255, 0, 255), (block * index, block * index_2, block, block))
+                    pygame.draw.rect(display, (96, 148, 188), (block * index, block * index_2, block, block))
                 elif item == "@":
-                    pygame.draw.rect(display, (255, 255, 255), (block * index, block * index_2, block, block))
+                    pygame.draw.rect(display, (229, 0, 27), (block * index, block * index_2, block, block))
         pygame.display.update()
 
 

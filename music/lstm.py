@@ -1,3 +1,18 @@
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("Action", help="Action to perform, learn or create")
+parser.add_argument('Data', help="Data for neural network")
+parser.add_argument('--weights', '-w', '-f', type=str, help="Weights for neural network")
+parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run", default=5)
+parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
+parser.add_argument('--length', '-l', type=int, help="Length per song", default=1000)
+
+args = parser.parse_args()
+
+if args.Action.lower() != "create" and args.Action.lower() != "learn":
+    print("\nWrong Action Argument")
+    quit()
+
 import numpy
 from keras.models import Sequential
 from keras.layers import Dense
@@ -8,23 +23,9 @@ from keras.utils import np_utils
 import csv
 import convert_long
 from tqdm import tqdm
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument("Action", help="Action to perform, learn or create")
-parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run", default=5)
-parser.add_argument('--file', '-f', type=str, help="Weights for neural network")
-parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
-parser.add_argument('--length', '-l', type=int, help="Length per song", default=1000)
-
-args = parser.parse_args()
-
-if args.Action.lower() != "create" and args.Action.lower() != "learn":
-    print("\nWrong Action Argument")
-    quit()
 
 data = ""
-with open("data.csv") as f:
+with open(args.data) as f:
     print("Reading from", f.name)
     r = csv.reader(f)
     for row in r:
@@ -75,7 +76,7 @@ model.compile(loss='categorical_crossentropy', optimizer='adam')
 def learn():
     print("\n")
     file_path ="weights/weights--{epoch:02d}-{loss:.4f}.hdf5"
-    checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
+    checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=False, mode='min')
     callbacks_list = [checkpoint]
 
     model.fit(X, y, epochs=args.epochs, batch_size=128, callbacks=callbacks_list) # Fit network to data

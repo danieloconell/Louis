@@ -25,7 +25,7 @@ import convert_long
 from tqdm import tqdm
 
 data = ""
-with open(args.data) as f:
+with open(args.Data) as f:
     print("Reading from", f.name)
     r = csv.reader(f)
     for row in r:
@@ -67,15 +67,18 @@ model.add(Dropout(0.2))
 model.add(LSTM(256))
 model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
-if args.file:
-    model.load_weights(args.file)
+if args.weights:
+    model.load_weights(args.weights)
 
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 
 def learn():
     print("\n")
-    file_path ="weights/weights--{epoch:02d}-{loss:.4f}.hdf5"
+    current_data = args.Data.split("/")
+    current_data = current_data[len(current_data)-1]
+    current_data = current_data.split(".")[0]
+    file_path ="weights/"+current_data+"-weights--{epoch:02d}-{loss:.4f}.hdf5"
     checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=False, mode='min')
     callbacks_list = [checkpoint]
 

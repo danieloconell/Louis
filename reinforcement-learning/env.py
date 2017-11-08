@@ -139,7 +139,7 @@ def render():
         pygame.display.update()
 
 
-def create_reward(action):
+def reward(action):
     """Return the reward based on an action."""
     global player, object, actual_reward
 

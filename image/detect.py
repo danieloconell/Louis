@@ -23,7 +23,7 @@ def update_feed():
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
 
-    img = img.resize((1244,700))
+    img = img.resize((1350,759))
 
     imgtk = ImageTk.PhotoImage(image=img)
 
@@ -35,6 +35,8 @@ def update_feed():
 def key_binding(event):
     if event.char == " ":
         predict()
+    elif event.char == "q":
+        root.destroy()
 
 
 def predict():
@@ -61,6 +63,7 @@ def make_text(pred_list):
     preds2.set("\n".join(a[1:]))
     root.update_idletasks()
 
+tk.Frame = tk.LabelFrame
 
 title = tk.Label(root, text="Google image recognition", font="Verdana 20 bold")
 title.pack(side=tk.TOP)
@@ -68,25 +71,22 @@ title.pack(side=tk.TOP)
 video_frame = tk.Frame(root)
 video_frame.pack(side=tk.TOP)
 
-text_frame = tk.Frame(root)
-text_frame.pack(side=tk.BOTTOM)
+text_frame_main = tk.Frame(root) 
+text_frame_main.pack(side=tk.TOP)
 
-feed = tk.Label(root)
-feed.pack(fill=tk.BOTH)
-img = None
 
-photo_button = tk.Button(text_frame, text="Run detection", command=predict)
-photo_button.pack()
+photo_button = tk.Button(text_frame_main, text="Run detection", command=predict, height=4, width=20, font="Verdana 15 bold")
+photo_button.grid(column=0, row=0, padx=10, pady=20)
 
 preds = tk.StringVar()
 preds.set("")
-prediction_text = tk.Label(text_frame, textvariable=preds, font="Verdana 15 bold")
-prediction_text.pack()
+prediction_text = tk.Label(text_frame_main, textvariable=preds, font="Verdana 25 bold")
+prediction_text.grid(column=1, row=0, padx=10, pady=20)
 
 preds2 = tk.StringVar()
 preds2.set("")
-prediction_text_small = tk.Label(text_frame, textvariable=preds2, font="Verdana 12")
-prediction_text_small.pack()
+prediction_text_small = tk.Label(text_frame_main,textvariable=preds2, font="Verdana 14")
+prediction_text_small.grid(column=2, row=0, padx=10, pady=20)
 
 video_feed = tk.Label(video_frame)
 video_feed.pack()
@@ -94,4 +94,5 @@ video_feed.pack()
 root.bind("<Key>", key_binding)
 
 update_feed()
+root.attributes("-fullscreen", True)
 root.mainloop()

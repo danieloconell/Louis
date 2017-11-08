@@ -146,7 +146,7 @@ def reward(action):
     reward = 0
 
     if player == object[0] and action == "stay":
-        reward += 1
+        reward += 15
         return reward
     elif player == object[0] and action == "left":
         return reward
@@ -174,11 +174,11 @@ def reward(action):
             reward += 0
             return reward
         else:
-            reward += 1
+            reward += 0
             return reward
     elif object[0] < player:
         if action_1_difference < action_2_difference:
-            reward += 1
+            reward += 0
             return reward
         else:
             reward += 0

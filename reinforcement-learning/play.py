@@ -14,15 +14,18 @@ for episode in range(10):
                 "Episode %d finished after %d timesteps, with reward %d"
                 % ((episode + 1), (t + 1), episode_reward))
             break
-        max_action = 0
+        max_action = -1
         index = -1
         for item in env.actions:
-            if env.create_reward(item) > max_action:
-                max_action = env.create_reward(item)
+            print(item)
+            print(env.reward(item))
+            if env.reward(item) > max_action:
+                print("greater")
+                max_action = env.reward(item)
                 action = [item, index]
             else:
                 index += 1
         print(action[0])
-        episode_reward += env.create_reward(action[0])
+        episode_reward += env.reward(action[0])
         env.action(action[0])
         env.render()

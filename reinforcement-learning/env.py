@@ -152,6 +152,12 @@ def reward(action):
         return reward
     elif player == object[0] and action == "right":
         return reward
+    elif player == object[0] - 1 and action == "right":
+        reward += 15
+        return reward
+    elif player == object[0] + 1 and action == "left":
+        reward += 15
+        return reward
 
     # if player move in direction of object, increase reward
     if action == "left":

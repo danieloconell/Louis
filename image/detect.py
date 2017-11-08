@@ -1,59 +1,97 @@
-from keras.applications.inception_v3 import InceptionV3, decode_predictions, preprocess_input
-from keras.utils import plot_model
-from keras.preprocessing import image
+import tkinter as tk
 import cv2
+from PIL import Image, ImageTk
+from keras.applications.inception_v3 import InceptionV3, decode_predictions, preprocess_input
+from keras.preprocessing import image
 import numpy as np
-from PIL import Image
 
+width, height = 1244,700
+
+cam = cv2.VideoCapture(0)
+cam.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+cam.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+root = tk.Tk()
 
 model = InceptionV3(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None, classes=1000)
 target_size = (224, 224)
 
 
-def predict(img):
+def update_feed():
 
-    img = Image.fromarray(img)
+    _, frame = cam.read()
+    cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    img = Image.fromarray(cv2image)
 
-    if img.size != target_size:
-        img = img.resize(target_size)
+    img = img.resize((1244,700))
 
-    x = image.img_to_array(img)
+    imgtk = ImageTk.PhotoImage(image=img)
+
+    video_feed.imgtk = imgtk
+    video_feed.configure(image=imgtk)
+    video_feed.after(10, update_feed)
+
+
+def key_binding(event):
+    if event.char == " ":
+        predict()
+
+
+def predict():
+    _, input_img = cam.read()
+    input_img = Image.fromarray(input_img)
+
+    if input_img.size != target_size:
+        input_img = input_img.resize(target_size)
+
+    x = image.img_to_array(input_img)
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)
     preds = model.predict(x)
-    return decode_predictions(preds, top=5)[0]
+    plist = (decode_predictions(preds, top=5)[0])
+    make_text(plist)
 
 
-def clean_list(list):
-    a = 1
-    for i in list:
-        info = "%i. %s - %f" % (a, i[1], (round(i[2] * 1000)/10))
-        print(info)
-        a += 1
+def make_text(pred_list):
+    a = []
+    for index, value in enumerate(pred_list, start=1):
+        a.append("%i. %s - %i%%" % (index, value[1], int(round(value[2]*100))))
+
+    preds.set(a[0])
+    preds2.set("\n".join(a[1:]))
+    root.update_idletasks()
 
 
-cam = cv2.VideoCapture(0)
+title = tk.Label(root, text="Google image recognition", font="Verdana 20 bold")
+title.pack(side=tk.TOP)
 
-while(True):
-    ret, img = cam.read()
-    img = cv2.flip(img, 1)
-    cv2.imshow('frame', img)
+video_frame = tk.Frame(root)
+video_frame.pack(side=tk.TOP)
 
-    if cv2.waitKey(1) & 0xFF == ord(' '):
-        print(chr(27) + "[2J")
-        prediction = predict(img)
-        # print(prediction)
+text_frame = tk.Frame(root)
+text_frame.pack(side=tk.BOTTOM)
 
-        clean_list(prediction)
-        
-        # first = prediction[0]
-        # cv2.putText(img, str(first[1]), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, 255)
+feed = tk.Label(root)
+feed.pack(fill=tk.BOTH)
+img = None
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+photo_button = tk.Button(text_frame, text="Run detection", command=predict)
+photo_button.pack()
 
+preds = tk.StringVar()
+preds.set("")
+prediction_text = tk.Label(text_frame, textvariable=preds, font="Verdana 15 bold")
+prediction_text.pack()
 
-# When everything done, release the capture
-cam.release()
-cv2.destroyAllWindows()
+preds2 = tk.StringVar()
+preds2.set("")
+prediction_text_small = tk.Label(text_frame, textvariable=preds2, font="Verdana 12")
+prediction_text_small.pack()
 
+video_feed = tk.Label(video_frame)
+video_feed.pack()
+
+root.bind("<Key>", key_binding)
+
+update_feed()
+root.mainloop()

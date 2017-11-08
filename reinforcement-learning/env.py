@@ -191,4 +191,10 @@ def sample_action():
 
     # random action
     decision = randint(0, (n_actions - 1))
+    if decision == 0:
+        decision = "left"
+    elif decision == 1:
+        decision = "right"
+    else:
+        decision = "stay"
     action(decision)

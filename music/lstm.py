@@ -1,3 +1,18 @@
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("Action", help="Action to perform, learn or create")
+parser.add_argument('Data', help="Data for neural network")
+parser.add_argument('--weights', '-w', '-f', type=str, help="Weights for neural network")
+parser.add_argument('--epochs', '-e', type=int, help="Number of epochs to be run", default=5)
+parser.add_argument('--num', '-n', type=int, help="Number of songs to be made", default=1)
+parser.add_argument('--length', '-l', type=int, help="Length per song", default=1000)
+
+args = parser.parse_args()
+
+if args.Action.lower() != "create" and args.Action.lower() != "learn":
+    print("\nWrong Action Argument")
+    quit()
+
 import numpy
 from keras.models import Sequential
 from keras.layers import Dense
@@ -6,15 +21,15 @@ from keras.layers import LSTM
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 import csv
-import sys
 import convert_long
+from tqdm import tqdm
 
 data = ""
-with open("data.csv") as f:
+with open(args.Data) as f:
     print("Reading from", f.name)
     r = csv.reader(f)
     for row in r:
-        for timestep in row:
+        for timestep in tqdm(row):
             data = data + timestep + chr(4000)  # to differentiate timesteps
 
 chars = sorted(list(set(data)))
@@ -32,7 +47,9 @@ print("Total Vocab:", n_vocab)
 seq_length = 100
 dataX = []
 dataY = []
-for i in range(0, n_chars - seq_length, 1):
+
+print("\nConverting Data")
+for i in tqdm(range(0, n_chars - seq_length, 1)):
     seq_in = data[i:i + seq_length]
     seq_out = data[i + seq_length]
     dataX.append([char_to_int[char] for char in seq_in])
@@ -50,29 +67,33 @@ model.add(Dropout(0.2))
 model.add(LSTM(256))
 model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
+if args.weights:
+    model.load_weights(args.weights)
+
+model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 
 def learn():
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
-
-    file_path ="weights/weights--{epoch:02d}-{loss:.4f}.hdf5"
-    checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
+    print("\n")
+    current_data = args.Data.split("/")
+    current_data = current_data[len(current_data)-1]
+    current_data = current_data.split(".")[0]
+    file_path ="weights/"+current_data+"-weights--{epoch:02d}-{loss:.4f}.hdf5"
+    checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=False, mode='min')
     callbacks_list = [checkpoint]
 
-    model.fit(X, y, epochs=5, batch_size=128, callbacks=callbacks_list) # Fit network to data
+    model.fit(X, y, epochs=args.epochs, batch_size=128, callbacks=callbacks_list) # Fit network to data
 
 
-def create(filename):
-    model.load_weights(filename)
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
-
+def create(outputfile):
     start = numpy.random.randint(0, len(dataX) - 1)
     pattern = dataX[start]
     print("Seed:")
     print(''.join([int_to_char[value] for value in pattern]))
 
     final = []
-    for i in range(10000):
+    print("\nCreating Music")
+    for i in tqdm(range(args.length)):
         x = numpy.reshape(pattern, (1, len(pattern), 1))
         x = x / float(n_vocab)
         prediction = model.predict(x, verbose=0)
@@ -84,7 +105,7 @@ def create(filename):
 
         final.append(result)
 
-    to_midi(final, "output")
+    to_midi(final, outputfile)
 
 
 def to_midi(a, name):
@@ -93,11 +114,14 @@ def to_midi(a, name):
     with open(str(name)+".csv", "w") as f:
         w = csv.writer(f)
         w.writerow(data)
-        convert_long.start(f.name)
+        fname = f.name
+    convert_long.start([fname])
+    print("\nDone!")
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == "learn":
-        learn()
-    elif sys.argv[1] == "create":
-        create(sys.argv[2])
+    if args.Action.lower() == "learn":
+       learn()
+    elif args.Action.lower() == "create":
+        for i in range(1, args.num+1):
+            create(i)

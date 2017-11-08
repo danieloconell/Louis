@@ -1,4 +1,4 @@
-import os, csv, pprint, threading
+import os, csv, pprint, threading, sys
 
 
 def to_beats(time, tempo):
@@ -7,6 +7,7 @@ def to_beats(time, tempo):
 
 def to_char(num):
     return chr(int(num))
+
 
 def run(file):
     print(file)
@@ -18,6 +19,7 @@ def run(file):
         for row in reader:
             if row[2] == " Time_signature":
                 tempo = int(row[5])
+                tempo = tempo * 4
                 break
 
         f.seek(0)
@@ -39,14 +41,15 @@ def run(file):
                     if row[2] == " Note_off_c":
                         playing = playing.replace(to_char(row[4]), "")
 
-            music.append(playing)
+            if playing != "":
+                music.append(playing)
+                
             f.seek(0)
 
-        with open(""+file, 'w') as myfile:
+        with open(file+"short", 'w') as myfile:
             wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
             wr.writerow(music)
 
-    # pprint.pprint(music)
 
 
 def start(files):

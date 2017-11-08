@@ -2,20 +2,20 @@
 """
 
 from env import reward
-import pandas as pd
 import numpy as np
 import env
 
 actions = ["left", "right", "stay"]
 gamma = 0.9
-table = np.zeros((28, 3, 28))
+table = np.zeros((28, 28, 3))
 
 
 def all_zero(list):
+    """Return true if all item in an array are 0."""
     for item in list:
-        for x in item:
-            if x != 0:
-                return False
+            for x in item:
+                if x != 0:
+                    return False
     return True
 
 
@@ -44,5 +44,9 @@ def q(state, action):
             action_n = index
 
     # q learning
+    new_value = reward(action) + gamma * np.amax(table[state])
+
     print(new_value)
-    table[env.object[0]][action_n][state] = new_value
+    table[env.object[0]][state][action_n] = new_value
+    print("special")
+    print(table[env.object[0]][state])

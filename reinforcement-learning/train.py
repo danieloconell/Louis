@@ -5,8 +5,9 @@ start = time.time()
 import env
 import rl
 env.make("text")
+rl.load_q()
 
-for episode in range(1000):
+for episode in range(10000):
     env.reset()
     episode_reward = 0
     for t in range(100):
@@ -22,5 +23,6 @@ for episode in range(1000):
         episode_reward += env.reward(action)
         env.action(action)
         env.update()
+rl.save_q()
 print(rl.table[env.object[0]])
 print("Finished after", str(time.time() - start), "seconds")

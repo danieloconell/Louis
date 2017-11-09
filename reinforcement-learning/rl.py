@@ -25,7 +25,6 @@ def choose_action(state):
     #if np.random.uniform() > gamma or all_zero(state):
     if all_zero(state):
         action = np.random.choice(actions)
-        print("zero")
         return action
     else:
         action = np.argmax(state)

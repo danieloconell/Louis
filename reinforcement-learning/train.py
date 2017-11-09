@@ -1,13 +1,30 @@
-"""This is the agent which currently takes the action with highest immediate reward."""
+"""This is the agent which currently takes the action with proper q learning."""
 
 import time
 start = time.time()
 from tqdm import tqdm
 import env
+import os
 import rl
 env.make("text")
-rl.load_q()
 episodes = 10000
+
+import argparse
+parser = argparse.ArgumentParser(description="Train agent on the falling game.")
+parser.add_argument("--remove-file", help="Remove existing q table.", default=True)
+parser.add_argument("--episodes", type=str, help="Number of episodes to train for.", default=10000)
+args = parser.parse_args()
+
+if args.remove_file == True:
+    os.remove("q-table.npy")
+    rl.load_q()
+elif args.remove_file == "False":
+    rl.load_q()
+else:
+    print("Invalid argument.")
+    quit()
+
+episodes = int(args.episodes)
 
 with tqdm(total=episodes) as pbar:
     for episode in range(episodes):

@@ -63,8 +63,6 @@ def make_text(pred_list):
     preds2.set("\n".join(a[1:]))
     root.update_idletasks()
 
-tk.Frame = tk.LabelFrame
-
 title = tk.Label(root, text="Google image recognition", font="Verdana 20 bold")
 title.pack(side=tk.TOP)
 

@@ -1,13 +1,13 @@
 """Basic reinforcement learning functions.
 """
 
+from pathlib import Path
 from env import reward
 import numpy as np
 import env
 
 actions = ["left", "right", "stay"]
 gamma = 0.8 # make the agent explore a bit
-table = np.zeros((28, 28, 3))
 np.random.seed(0) # to make results the same
 
 
@@ -40,6 +40,7 @@ def choose_action(state):
             action = "stay"
         return action
 
+
 def q(state, action):
     """Update the q table."""
     index = -1
@@ -52,3 +53,19 @@ def q(state, action):
     new_value = reward(action) + gamma * np.amax(table[env.object[0]])
 
     table[env.object[0]][int(state)][action_n] = new_value
+
+
+def save_q():
+    """Locally save the q table."""
+    np.save("q-table", table)
+
+
+def load_q():
+    """Load q table if one exists."""
+    global table
+    table = Path("q-table.npy")
+    file = "q-table.npy"
+    if table.is_file():
+        table = np.load(file)
+    else:
+        table = np.zeros((28, 28, 3))

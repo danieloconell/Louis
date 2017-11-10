@@ -37,8 +37,6 @@ def reset():
     """Reset all the necessary variables for the environment."""
     global screen, screen_height, screen_width, object, player, actual_reward, done
 
-    print("Resetting")
-
     # create the screen which is an empty array of spaces
     screen = [[" "] * screen_width for x in range(screen_height)]
 

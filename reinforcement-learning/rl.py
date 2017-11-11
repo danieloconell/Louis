@@ -87,12 +87,15 @@ def save_q():
     np.save("q-table", table)
 
 
-def load_q():
+def load_q(argument):
     """Load q table if one exists."""
     global table
     table = Path("q-table.npy")
     file = "q-table.npy"
     if table.is_file():
         table = np.load(file)
-    else:
+    elif argument == "train":
         table = np.zeros((28, 28, 3))
+    else:
+        print("No q table found.")
+        quit()

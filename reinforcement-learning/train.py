@@ -17,11 +17,11 @@ args = parser.parse_args()
 
 if args.remove_file == True and os.path.isfile("q-table.npy") == True:
     os.remove("q-table.npy")
-    rl.load_q()
+    rl.load_q("")
 elif args.remove_file == True and os.path.isfile("q-table.npy") == False:
-    rl.load_q()
+    rl.load_q("train")
 elif args.remove_file == "False":
-    rl.load_q()
+    rl.load_q("train")
 else:
     print("Invalid argument.")
     quit()

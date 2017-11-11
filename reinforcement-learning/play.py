@@ -13,7 +13,7 @@ while True:
     for _ in range(15):
         if env.done:
             break
-        action = rl.choose_action(rl.table[env.object[0]])
+        action = rl.choose_action(env.player, "test")
         env.action(action)
         time.sleep(0.03)
         env.render()

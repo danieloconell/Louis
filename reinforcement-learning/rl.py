@@ -5,6 +5,7 @@ from pathlib import Path
 from env import reward
 import numpy as np
 import env
+import time
 
 actions = ["left", "right", "stay"]
 gamma = 0.8 # make the agent explore a bit
@@ -13,31 +14,58 @@ np.random.seed(0) # to make results the same
 
 def all_zero(list):
     """Return true if all item in an array are 0."""
+    list = table[env.object[0]][int(list)]
     for item in list:
-            for x in item:
-                if x != 0:
-                    return False
+        if item != 0:
+            return False
     return True
 
 
-def choose_action(state):
+def choose_action(state, type):
     """Choose action based on q table."""
-    #if np.random.uniform() > gamma or all_zero(state):
-    if all_zero(state):
-        action = np.random.choice(actions)
+    if int(env.player) < env.object[0]:
+        stay = [np.argmax(table[env.object[0]][int(state)]), np.max(table[env.object[0]][int(state)])]
+        right = [np.argmax(table[env.object[0]][int(state) + 1]), np.max(table[env.object[0]][int(state) + 1])]
+        left = [np.argmax(table[env.object[0]][int(state) - 1]), np.max(table[env.object[0]][int(state) - 1])]
+    elif int(env.player) == env.object[0]:
+        action = "stay"
         return action
     else:
-        action = np.argmax(state)
-        index_1 = int(round(action / 3))
-        index_2 = int(action - index_1 * 3)
-        index_1 -= 1
-        if index_2 == 0:
-            action = "left"
-        elif index_2 == 1:
-            action = "right"
+        stay = [np.argmax(table[env.object[0]][int(state)]), np.max(table[env.object[0]][int(state)])]
+        right = [np.argmax(table[env.object[0]][int(state) + 1]), np.max(table[env.object[0]][int(state) - 1])]
+        left = [np.argmax(table[env.object[0]][int(state) - 1]), np.max(table[env.object[0]][int(state) + 1])]
+    if type == "train":
+        if np.random.uniform() > gamma or all_zero(state):
+            action = np.random.choice(actions)
+            return action
         else:
-            action = "stay"
-        return action
+            if stay[1] > right[1] and left[1]:
+                action = "stay"
+            elif left[1] > stay[1] and right[1]:
+                action = "left"
+            else:
+                action = "right"
+            return action
+    elif type == "test":
+        if int(env.player) < env.object[0]:
+            if stay[1] > right[1] and left[1]:
+                action = "stay"
+            elif left[1] > stay[1] and right[1]:
+                action = "left"
+            else:
+                action = "right"
+            return action
+        else:
+            if stay[1] > right[1] and left[1]:
+                action = "stay"
+            elif right[1] > stay[1] and left[1]:
+                action = "right"
+            else:
+                action = "left"
+            return action
+    else:
+        print("Invalid option")
+        quit()
 
 
 def q(state, action):
@@ -49,7 +77,7 @@ def q(state, action):
             action_n = index
 
     # q learning
-    new_value = reward(action) + gamma * np.amax(table[env.object[0]])
+    new_value = reward(action) + gamma * np.amax(table[env.object[0]][int(env.player)])
 
     table[env.object[0]][int(state)][action_n] = new_value
 

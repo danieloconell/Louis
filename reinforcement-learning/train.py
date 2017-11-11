@@ -35,7 +35,7 @@ with tqdm(total=episodes) as pbar:
             if env.done:
                 pbar.update(1)
                 break
-            action = rl.choose_action(rl.table[env.object[0]])
+            action = rl.choose_action(env.player, "train")
             rl.q(env.player, action)
             episode_reward += env.reward(action)
             env.action(action)

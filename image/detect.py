@@ -1,7 +1,7 @@
 import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
-from keras.applications.inception_v3 import InceptionV3, decode_predictions, preprocess_input
+from keras.applications.inception_resnet_v2 import InceptionResNetV2, decode_predictions, preprocess_input
 from keras.preprocessing import image
 import numpy as np
 
@@ -15,7 +15,7 @@ root = tk.Tk()
 
 widgets = [root]
 
-model = InceptionV3(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None, classes=1000)
+model = InceptionResNetV2(include_top=True, weights='imagenet', input_tensor=None, input_shape=None, pooling=None, classes=1000)
 target_size = (224, 224)
 
 
@@ -73,24 +73,28 @@ video_frame = tk.Frame(root)
 video_frame.pack(side=tk.TOP)
 widgets.append(video_frame)
 
+button_frame = tk.Frame(root)
+button_frame.pack(side=tk.LEFT)
+widgets.append(button_frame)
+
 text_frame_main = tk.Frame(root)
-text_frame_main.pack(side=tk.TOP)
+text_frame_main.pack(side=tk.LEFT)
 widgets.append(text_frame_main)
 
-photo_button = tk.Button(text_frame_main, text="Run detection", command=predict, height=4, width=20, font="Verdana 15 bold")#, borderwidth=0)
-photo_button.grid(column=0, row=0, padx=10, pady=20)
+photo_button = tk.Button(button_frame, text="Run detection", command=predict, height=4, width=20, font="Verdana 15 bold")#, borderwidth=0)
+photo_button.grid(column=0, row=0, padx=(40, 0), pady=20)
 widgets.append(photo_button)
 
 preds = tk.StringVar()
 preds.set("")
 prediction_text = tk.Label(text_frame_main, textvariable=preds, font="Verdana 25 bold")
-prediction_text.grid(column=1, row=0, padx=10, pady=20)
+prediction_text.grid(column=0, row=0, padx=(100,100), pady=20)
 widgets.append(prediction_text)
 
 preds2 = tk.StringVar()
 preds2.set("")
 prediction_text_small = tk.Label(text_frame_main,textvariable=preds2, font="Verdana 14")
-prediction_text_small.grid(column=2, row=0, padx=10, pady=20)
+prediction_text_small.grid(column=1, row=0, padx=10, pady=20)
 widgets.append(prediction_text_small)
 
 video_feed = tk.Label(video_frame)

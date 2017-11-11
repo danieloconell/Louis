@@ -15,8 +15,10 @@ parser.add_argument("--remove-file", help="Remove existing q table.", default=Tr
 parser.add_argument("--episodes", type=str, help="Number of episodes to train for.", default=10000)
 args = parser.parse_args()
 
-if args.remove_file == True:
+if args.remove_file == True and os.path.isfile("q-table.npy") == True:
     os.remove("q-table.npy")
+    rl.load_q()
+elif args.remove_file == True and os.path.isfile("q-table.npy") == False:
     rl.load_q()
 elif args.remove_file == "False":
     rl.load_q()

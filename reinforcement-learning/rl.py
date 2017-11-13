@@ -1,10 +1,10 @@
 """Basic reinforcement learning functions.
 """
 
-from pathlib import Path
 from env import reward
 import numpy as np
 import env
+import os
 
 actions = ["left", "right", "stay"]
 np.random.seed(0)   # to make results the same
@@ -62,15 +62,11 @@ def save_q():
     np.save("q-table", table)
 
 
-def load_q(argument):
+def load_q():
     """Load q table if one exists."""
     global table
-    table = Path("q-table.npy")
     file = "q-table.npy"
-    if table.is_file():
+    if os.path.isfile(file):
         table = np.load(file)
-    elif argument == "train":
-        table = np.zeros((28, 28, 3))
     else:
-        print("No q table found.")
-        quit()
+        table = np.zeros((28, 28, 3))

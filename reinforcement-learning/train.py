@@ -1,28 +1,31 @@
 """This is the agent which currently takes the action with proper q learning.
 """
 
-import time
-start = time.time()
 from tqdm import tqdm
+import argparse
+import time
 import env
 import os
 import rl
+start = time.time()
 env.make("text")
 episodes = 10000
 
-import argparse
-parser = argparse.ArgumentParser(description="Train agent on the falling game.")
-parser.add_argument("--remove-file", help="Remove existing q table.", default=True)
-parser.add_argument("--episodes", type=str, help="Number of episodes to train for.", default=10000)
+parser = argparse.ArgumentParser(description="Train \
+        agent on the falling game.")
+parser.add_argument("--remove-file", help="Remove \
+        existing q table.", default=True)
+parser.add_argument("--episodes", type=str, help="Number \
+        of episodes to train for.", default=10000)
 args = parser.parse_args()
 
 if args.remove_file is True and os.path.isfile("q-table.npy") is True:
     os.remove("q-table.npy")
-    rl.load_q("")
+    rl.load_q()
 elif args.remove_file is True and os.path.isfile("q-table.npy") is False:
-    rl.load_q("train")
+    rl.load_q()
 elif args.remove_file == "False":
-    rl.load_q("train")
+    rl.load_q()
 else:
     print("Invalid argument.")
     quit()

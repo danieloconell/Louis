@@ -23,6 +23,13 @@ from keras.utils import np_utils
 import csv
 import convert_long
 from tqdm import tqdm
+import os
+
+if not os.path.isdir("output"):
+    os.mkdir("output")
+
+if not os.path.isdir("weights"):
+    os.mkdir("weights")
 
 data = ""
 with open(args.Data) as f:

@@ -5,7 +5,7 @@ import time
 import env
 import rl
 
-rl.load_q("")
+rl.load_q()
 env.make("pygame")
 speed = 0.2
 

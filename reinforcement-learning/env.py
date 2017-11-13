@@ -4,8 +4,12 @@ In which the aim is to catch falling objects.
 
 """
 
-from random import randint
+from numpy.random import randint
+import numpy as np
 import pygame
+
+# make results reqproducible
+np.random.seed(0)
 
 # global variables for environemt
 actions = ["left", "right", "stay"]
@@ -41,7 +45,7 @@ def reset():
     screen = [[" "] * screen_width for x in range(screen_height)]
 
     # create object
-    object = [0, 0]
+    object = [12, 0]
 
     # create player
     player = (screen_width // 2)

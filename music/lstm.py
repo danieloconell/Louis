@@ -112,7 +112,7 @@ def create(outputfile):
 def to_midi(a, name):
     a_str = "".join(a)
     data = a_str.split(chr(4000))
-    with open(str(name)+".csv", "w") as f:
+    with open("output/"+str(name)+".csv", "w") as f:
         w = csv.writer(f)
         w.writerow(data)
         fname = f.name

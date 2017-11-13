@@ -1,4 +1,5 @@
-"""This is the agent which currently takes the action with proper q learning."""
+"""This is the agent which currently takes the action with proper q learning.
+"""
 
 import time
 start = time.time()
@@ -15,10 +16,10 @@ parser.add_argument("--remove-file", help="Remove existing q table.", default=Tr
 parser.add_argument("--episodes", type=str, help="Number of episodes to train for.", default=10000)
 args = parser.parse_args()
 
-if args.remove_file == True and os.path.isfile("q-table.npy") == True:
+if args.remove_file is True and os.path.isfile("q-table.npy") is True:
     os.remove("q-table.npy")
     rl.load_q("")
-elif args.remove_file == True and os.path.isfile("q-table.npy") == False:
+elif args.remove_file is True and os.path.isfile("q-table.npy") is False:
     rl.load_q("train")
 elif args.remove_file == "False":
     rl.load_q("train")

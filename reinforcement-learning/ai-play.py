@@ -24,5 +24,5 @@ while True:
             break
         action = rl.choose_action(env.player, "test")
         env.action(action)
-        time.sleep(speed)
+        time.sleep(0.03)
         env.render()

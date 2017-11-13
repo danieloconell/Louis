@@ -35,17 +35,16 @@ def make(env):
 
 def reset():
     """Reset all the necessary variables for the environment."""
-    global screen, screen_height, screen_width, object, player, actual_reward, done
+    global actual_reward, done, object, player, screen
 
     # create the screen which is an empty array of spaces
     screen = [[" "] * screen_width for x in range(screen_height)]
 
     # create object
-    object = []
-    object.extend([randint(0, screen_width - 1), 0])
+    object = [0, 0]
 
     # create player
-    player = (screen_width / 2)
+    player = (screen_width // 2)
 
     # reset done and reward
     done = False
@@ -53,12 +52,13 @@ def reset():
 
 
 def action(action):
-    """Action 0 move player left 1 move player right."""
+    """Action 0 move left, 1 move right, 2 stay."""
     global old_player, player
 
     # if player is at one of the screen borders do not move
     if player == screen_width - 1:
         player = player
+    # based on chosen action move player
     elif action == "left":
         old_player = player
         player -= interval
@@ -74,7 +74,7 @@ def action(action):
 
 def update():
     """Make the object fall and update the player location."""
-    global old_object, object, done, observation, actual_reward, reward
+    global done
     old_object = []
     old_object.extend([object[0], object[1]])
     if object[1] == screen_height - 2:
@@ -97,9 +97,6 @@ def update():
 
 def render():
     """Render everything that needs to be drawn."""
-    global object, old_object, old_player, player, screen, screen_height
-    global screen_width, observation, done, type, display
-
     # update
     update()
 
@@ -129,11 +126,14 @@ def render():
                     None
                 index += 1
                 if item == " ":
-                    pygame.draw.rect(display, (236, 236, 236), (block * index, block * index_2, block, block))
+                    pygame.draw.rect(display, (236, 236, 236), \
+                            (block * index, block * index_2, block, block))
                 elif item == "0":
-                    pygame.draw.rect(display, (96, 148, 188), (block * index, block * index_2, block, block))
+                    pygame.draw.rect(display, (96, 148, 188), \
+                            (block * index, block * index_2, block, block))
                 elif item == "@":
-                    pygame.draw.rect(display, (229, 0, 27), (block * index, block * index_2, block, block))
+                    pygame.draw.rect(display, (229, 0, 27), \
+                            (block * index, block * index_2, block, block))
         pygame.display.update()
 
 
@@ -144,17 +144,17 @@ def reward(action):
     reward = 0
 
     if player == object[0] and action == "stay":
-        reward += 15
+        reward += 100
         return reward
     elif player == object[0] and action == "left":
         return reward
     elif player == object[0] and action == "right":
         return reward
     elif player == object[0] - 1 and action == "right":
-        reward += 15
+        reward += 10
         return reward
     elif player == object[0] + 1 and action == "left":
-        reward += 15
+        reward += 10
         return reward
 
     # if player move in direction of object, increase reward

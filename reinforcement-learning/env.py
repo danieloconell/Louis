@@ -1,208 +1,146 @@
-"""Welcome to the falling environemt.
+"""Falling environment.
 
-In which the aim is to catch falling objects.
-
+The aim of this environment is to catch a falling square.  The environment is
+rendered using pygame.
 """
 
-from numpy.random import randint
 import numpy as np
 import pygame
 
-# make results reqproducible
+# make results reproducible
 np.random.seed(0)
 
-# global variables for environemt
-actions = ["left", "right", "stay"]
-block = 25
-screen_width = 28
-screen_height = 14
-n_actions = 2
-observation = [0, 0, False]
-interval = 1
+# get pygame ready!
+pygame.init()
 
 
-def make(env):
-    """Chose whether the environment is text or in pygame."""
-    global type, display
-    if env == "pygame":
-        pygame.init()
-        width = block * (screen_width + 2)
-        height = block * (screen_height + 2)
-        display = pygame.display.set_mode([width, height])
-        display.fill((96, 96, 96))
-        type = "pygame"
-    elif env == "text":
-        type = "text"
-    else:
-        print("Invalid environment type")
+class Falling:
 
+    ACTIONS = ["left", "right", "stay"]
+    BLOCK = pygame.display.Info().current_w // 50
+    SCREEN_WIDTH = 22
+    SCREEN_HEIGHT = 12
+    INTERVAL = 1
 
-def reset():
-    """Reset all the necessary variables for the environment."""
-    global actual_reward, done, object, player, screen
+    def __init__(self):
+        """Create the environment using pygame."""
 
-    # create the screen which is an empty array of spaces
-    screen = [[" "] * screen_width for x in range(screen_height)]
+        self.pygame_init = True
 
-    # create object
-    object = [12, 0]
+    def reset(self):
+        """Reset all the necessary variables for the environment."""
 
-    # create player
-    player = (screen_width // 2)
+        # create object
+        self.square = [np.random.randint(1, self.SCREEN_WIDTH + 1), 0]
 
-    # reset done and reward
-    done = False
-    actual_reward = 0
+        # create agent
+        self.agent = (self.SCREEN_WIDTH // 2 + 1)
 
+        # reset done
+        self.done = False
 
-def action(action):
-    """Action 0 move left, 1 move right, 2 stay."""
-    global old_player, player
+    def quit(self):
+        """Quit the Falling environment."""
+        pygame.quit()
 
-    # if player is at one of the screen borders do not move
-    if player == screen_width - 1:
-        player = player
-    # based on chosen action move player
-    elif action == "left":
-        old_player = player
-        player -= interval
-    elif action == "right":
-        old_player = player
-        player += interval
-    elif action == "stay":
-        old_player = player - 1
-        player = player
-    else:
-        print("Invalid action")
+    def make_action(self, action: str):
+        """Move agent and update acion reward.
+        Args:
+            action: left, right or stay.
+        """
 
+        # if agent is at one of the screen borders do not move
+        if self.agent >= self.SCREEN_WIDTH or self.agent <= 0:
+            pass
+        # based on chosen action move agent
+        elif action == "left":
+            self.old_agent = self.agent
+            self.agent -= self.INTERVAL
+        elif action == "right":
+            self.old_agent = self.agent
+            self.agent += self.INTERVAL
+        elif action == "stay":
+            self.old_agent = self.agent - 1
+            self.agent = self.agent
+        else:
+            print("Invalid action")
 
-def update():
-    """Make the object fall and update the player location."""
-    global done
-    old_object = []
-    old_object.extend([object[0], object[1]])
-    if object[1] == screen_height - 2:
-        done = True
-    else:
-        object[1] += 1
+        self.update()
 
-    # make observation
-    observation = []
-    observation.extend([[object, player], actual_reward, done])
+    def update(self):
+        """Make the square fall and update score."""
 
-    # draw player and remove old player
-    screen[screen_height - 1][int(player)] = "@"
-    screen[screen_height - 1][int(old_player)] = " "
+        # if square at bottom of screen GAME OVER
+        if self.square[1] == self.SCREEN_HEIGHT - 1:
+            self.done = True
+        else:
+            self.square[1] += 1
 
-    # draw object and remove old object
-    screen[object[1]][object[0]] = "0"
-    screen[old_object[1]][old_object[0]] = " "
+    def update_score(self, won: int, lost: int):
+        """Display the new score on the screen"""
+        # show games won
+        basicfont = pygame.font.SysFont("SFNS Display", 50)
+        text = basicfont.render(f"Games won: {won}, {won / (won + lost):.6f} ",
+                                True, (255, 255, 255), (96,) * 3)
+        textrect = text.get_rect()
+        textrect.x = 0
+        textrect.y = (self.SCREEN_HEIGHT + 1) * self.BLOCK
+        self.display.blit(text, textrect)
 
-
-def render():
-    """Render everything that needs to be drawn."""
-    # update
-    update()
-
-    index = 0
-    index_2 = 0
-
-    if type == "text":
-        print("#" * (screen_width + 2))
-        for row in screen:
-            for item in row:
-                if index == screen_width:
-                    print("#")
-                    index = 0
-                if index == 0:
-                    print("#", end="")
-                index += 1
-                print(item, end="")
-        print("#", end="\n")
-        print("#" * (screen_width + 2))
-    elif type == "pygame":
-        for row in screen:
-            index_2 += 1
-            for item in row:
-                if index == screen_width:
-                    index = 0
-                elif index == 0:
-                    None
-                index += 1
-                if item == " ":
-                    pygame.draw.rect(display, (236, 236, 236), \
-                            (block * index, block * index_2, block, block))
-                elif item == "0":
-                    pygame.draw.rect(display, (96, 148, 188), \
-                            (block * index, block * index_2, block, block))
-                elif item == "@":
-                    pygame.draw.rect(display, (229, 0, 27), \
-                            (block * index, block * index_2, block, block))
         pygame.display.update()
 
+    def render(self):
+        """Render everything that needs to be drawn."""
 
-def reward(action):
-    """Return the reward based on an action."""
-    global player, object, actual_reward
+        # only on first run initialise screen
+        if self.pygame_init:
+            width = self.BLOCK * (self.SCREEN_WIDTH + 2)
+            height = self.BLOCK * (self.SCREEN_HEIGHT + 2)
+            self.display = pygame.display.set_mode([width, height])
+            self.display.fill((96,) * 3)
+            self.pygame_init = False
 
-    reward = 0
+        # empty space
+        pygame.draw.rect(self.display, (236,) * 3,
+                         (self.BLOCK, self.BLOCK,
+                         self.SCREEN_WIDTH * self.BLOCK,
+                         self.SCREEN_HEIGHT * self.BLOCK))
+        # object
+        pygame.draw.rect(self.display, (96, 148, 188),
+                         (self.BLOCK * self.square[0],
+                          self.BLOCK * (self.square[1] + 1),
+                          self.BLOCK, self.BLOCK))
+        # player
+        pygame.draw.rect(self.display, (229, 0, 27),
+                         (self.BLOCK * self.agent,
+                          (self.SCREEN_HEIGHT) * self.BLOCK,
+                          self.BLOCK, self.BLOCK))
+        pygame.display.update()
 
-    if player == object[0] and action == "stay":
-        reward += 100
-        return reward
-    elif player == object[0] and action == "left":
-        return reward
-    elif player == object[0] and action == "right":
-        return reward
-    elif player == object[0] - 1 and action == "right":
-        reward += 10
-        return reward
-    elif player == object[0] + 1 and action == "left":
-        reward += 10
-        return reward
+    def reward(self, action: str):
+        """Return the reward based on an action location and square.
+        Args:
+            action: Action for agent to make
+        """
 
-    # if player move in direction of object, increase reward
-    if action == "left":
-        action = 0
-        other_action = 1
-        action_1_difference = object[0] - player + action
-        action_2_difference = object[0] - player + other_action
-    elif action == "right":
-        action = 1
-        other_action = 0
-        action_1_difference = object[0] - player + action
-        action_2_difference = object[0] - player + other_action
-    elif action == "stay":
-            reward = 0
-            return reward
-
-    # if player is at the location of the object
-    if object[0] > player:
-        if action_1_difference < action_2_difference:
-            reward += 0
-            return reward
+        # reward agent alot for moving to and staying on square and punish for
+        # not going next or on square
+        if self.agent == self.square[0] and action == "stay":
+            return 200
+        elif self.agent == self.square[0] and action == "left":
+            return -100
+        elif self.agent == self.square[0] and action == "right":
+            return -100
+        elif self.agent == self.square[0] - 1 and action == "right":
+            return 100
+        elif self.agent == self.square[0] + 1 and action == "left":
+            return 100
         else:
-            reward += 0
-            return reward
-    elif object[0] < player:
-        if action_1_difference < action_2_difference:
-            reward += 0
-            return reward
-        else:
-            reward += 0
-            return reward
+            return -50
 
+    def sample_action(self):
+        """Make a random action based on the possible actions."""
 
-def sample_action():
-    """Make a random action based on the possible actions."""
-    global n_actions
-
-    # random action
-    decision = randint(0, (n_actions - 1))
-    if decision == 0:
-        decision = "left"
-    elif decision == 1:
-        decision = "right"
-    else:
-        decision = "stay"
-    action(decision)
+        # random action
+        action = np.random.choice(self.ACTIONS)
+        self.make_action(action)

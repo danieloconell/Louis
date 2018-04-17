@@ -1,51 +1,60 @@
-"""This is the agent which currently takes the action with proper q learning.
-"""
-
-from tqdm import tqdm
 import argparse
-import time
-import env
 import os
-import rl
-start = time.time()
-env.make("text")
-episodes = 10000
 
-parser = argparse.ArgumentParser(description="Train \
-        agent on the falling game.")
-parser.add_argument("--remove-file", help="Remove \
-        existing q table.", default=True)
-parser.add_argument("--episodes", type=str, help="Number \
-        of episodes to train for.", default=10000)
+import matplotlib.pyplot as plt
+from tqdm import trange
+
+from env import Falling
+import rl
+
+# create environment and other variables
+env = Falling()
+won = lost = 0
+won_list = []
+games_list = []
+
+# parse some arguments
+parser = argparse.ArgumentParser(description="Train agent on the falling " +
+                                 "environment")
+parser.add_argument("--remove-file", "-r", type=bool, help="Remove existing " +
+                    "q table", default=True)
+parser.add_argument("--episodes", "-e", type=int, help="Number of episodes " +
+                    "to train for", default=10000)
 args = parser.parse_args()
 
-if args.remove_file is True and os.path.isfile("q-table.npy") is True:
+# do what the arguments say
+if args.remove_file and os.path.isfile("q-table.npy"):
     os.remove("q-table.npy")
-    rl.load_q()
-elif args.remove_file is True and os.path.isfile("q-table.npy") is False:
-    rl.load_q()
-elif args.remove_file == "False":
-    rl.load_q()
-else:
-    print("Invalid argument.")
-    quit()
+    rl.load_q(new=True)
+elif args.remove_file and not os.path.isfile("q-table.npy"):
+    rl.load_q(new=True)
 
-episodes = int(args.episodes)
-
-with tqdm(total=episodes) as pbar:
-    for episode in range(episodes):
+# train agent
+with trange(1, args.episodes + 1) as t:
+    for episode in t:
         env.reset()
-        episode_reward = 0
-        for t in range(100):
-            episode_reward += env.actual_reward
-            if env.done:
-                pbar.update(1)
-                break
-            action = rl.choose_action(env.player, "train")
-            rl.q(env.player, action)
-            episode_reward += env.reward(action)
-            env.action(action)
-            env.update()
+        while not env.done:
+            action = rl.choose_action(env.agent, env.square, train=True)
+            rl.update_q(env.agent, action, env.reward(action), env.square)
+            env.make_action(action)
+            # env.render()  # if you want to see the training process
+
+        # keep track of how many won and lost
+        if env.agent == env.square[0]:
+            won += 1
+        else:
+            lost += 1
+        t.set_postfix(loss=f"{won / (won + lost):.2f}")
+        games_list.append(won + lost)
+        won_list.append(won / (won + lost))
+
+# save trained agent
 rl.save_q()
-print("Q table:")
-print(rl.table[env.object[0]])
+
+# show loss in a graph and save it
+plt.plot(games_list, won_list)
+plt.xlabel("Episode")
+plt.ylabel("Loss")
+plt.title("Falling environment")
+plt.savefig("falling-env.png")
+plt.show()

@@ -59,9 +59,15 @@ class Falling:
             player: Move player.
         """
 
+        # only update when not in duel mode
+        if not self.duel:
+            self.update()
+
         if self.duel and player:
             # if player is at one of the screen borders do not move
-            if self.human >= self.SCREEN_WIDTH or self.human <= 0:
+            if self.human == self.SCREEN_WIDTH and action == "right":
+                pass
+            elif self.human == 1 and action == "left":
                 pass
             # based on chosen action move human player
             elif action == "left":
@@ -78,7 +84,9 @@ class Falling:
 
         elif ai:
             # if agent is at one of the screen borders do not move
-            if self.agent >= self.SCREEN_WIDTH or self.agent <= 0:
+            if self.agent == self.SCREEN_WIDTH and action == "right":
+                pass
+            elif self.agent == 1 and action == "left":
                 pass
             # based on chosen action move agent
             elif action == "left":
@@ -92,10 +100,6 @@ class Falling:
                 self.agent = self.agent
             else:
                 print("Invalid action")
-
-        # only update when not in duel mode
-        if not self.duel:
-            self.update()
 
     def update(self):
         """Make the square fall and update score."""

@@ -25,7 +25,7 @@ while True:
         # why does making random move drastically increase performance
         action = rl.choose_action(env.agent, env.square, train=True)
         env.make_action(action)
-        # time.sleep(dec_log(won))
+        time.sleep(0.02)
 
         # quit if the user wants
         for event in pygame.event.get():

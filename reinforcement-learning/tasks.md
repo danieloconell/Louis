@@ -6,7 +6,9 @@
 > * Make simple function calling work
 > * Make pygame window close
 > * Display games won on screen
-* Duel mode
+> * No more division by zero
+> * Duel mode
+* Smooth out rendering
 * Update README.md
 * Why always win first episode
 * Tune random seed and q learning values

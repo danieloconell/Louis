@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser(description="Train agent on the falling " +
 parser.add_argument("--remove-file", "-r", type=bool, help="Remove existing " +
                     "q table", default=True)
 parser.add_argument("--episodes", "-e", type=int, help="Number of episodes " +
-                    "to train for", default=10000)
+                    "to train for", default=20000)
 args = parser.parse_args()
 
 # do what the arguments say

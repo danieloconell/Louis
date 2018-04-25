@@ -1,7 +1,6 @@
 """Load the trained q table and make actions based on that.
 """
 
-import time
 import numpy as np
 
 from env import Falling
@@ -10,7 +9,7 @@ import rl
 import pygame
 
 
-def dec_log(x): return 1 / np.log(x)
+def dec_log(x): return 1 / np.log(x) if x > 0 else 0
 
 
 rl.load_q()
@@ -25,7 +24,6 @@ while True:
         # why does making random move drastically increase performance
         action = rl.choose_action(env.agent, env.square, train=True)
         env.make_action(action)
-        time.sleep(0.02)
 
         # quit if the user wants
         for event in pygame.event.get():

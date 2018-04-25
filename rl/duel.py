@@ -21,10 +21,13 @@ while True:
 
         # quit if the user wants and get the human players action
         for event in pygame.event.get():
-            if event.type == pygame.QUIT: quit()
+            if event.type == pygame.QUIT:
+                quit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT: action = "left"
-                elif event.key == pygame.K_RIGHT: action = "right"
+                if event.key == pygame.K_LEFT:
+                    action = "left"
+                elif event.key == pygame.K_RIGHT:
+                    action = "right"
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     action = "stay"

@@ -23,7 +23,7 @@ def choose_action(agent: int, square: list, train=False) -> str:
             The action with the highest q value.  If they are all the same it
             returns a random action
         """
-    if np.random.uniform() > gamma and not train:
+    if np.random.uniform() > gamma and train:
         action = np.random.choice(env.ACTIONS)
         return action
     else:

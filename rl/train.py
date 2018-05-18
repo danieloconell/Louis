@@ -14,12 +14,11 @@ won_list = []
 games_list = []
 
 # parse some arguments
-parser = argparse.ArgumentParser(description="Train agent on the falling " +
-                                 "environment")
-parser.add_argument("--remove-file", "-r", type=bool, help="Remove existing " +
-                    "q table", default=True)
-parser.add_argument("--episodes", "-e", type=int, help="Number of episodes " +
-                    "to train for", default=1400)
+parser = argparse.ArgumentParser(description="Train agent on the falling environment")
+parser.add_argument("--remove-file", "-r", type=bool, help="Remove existing q table",
+                    default=True)
+parser.add_argument("--episodes", "-e", type=int, help="Number of episodes to train for",
+                    default=8400)
 args = parser.parse_args()
 
 # do what the arguments say

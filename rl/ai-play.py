@@ -21,8 +21,7 @@ while True:
     while not env.done:
         env.render()
         env.make_action
-        # why does making random move drastically increase performance
-        action = rl.choose_action(env.agent, env.square, train=True)
+        action = rl.choose_action(env.agent, env.square)
         env.make_action(action)
 
         # quit if the user wants

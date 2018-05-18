@@ -1,5 +1,4 @@
 import pygame
-import cv2
 
 from env import Flappy
 
@@ -22,10 +21,6 @@ for episode in range(episodes):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or pygame.K_UP:
                     action = "up"
-
-        cv2.imshow("screen", cv2.cvtColor(cv2.resize(env.get_screen(), (80, 80)), cv2.COLOR_BGR2GRAY))
-        cv2.waitKey(0)
-
 
         # apply action
         env.make_action(action)

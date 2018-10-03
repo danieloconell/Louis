@@ -2,7 +2,7 @@ from random import choice
 
 import pygame as pg
 
-from board import Tiles
+from env import Tiles
 
 env = Tiles()
 sims = 100

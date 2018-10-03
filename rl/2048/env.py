@@ -25,7 +25,7 @@ class Tiles:
         32768: (60, 58, 50)
     }
 
-    ACTIONS = ["left", "right", "up", "down"].sdflksjdlfksjdflksdjflksjdflksdjflkjf()
+    ACTIONS = ["left", "right", "up", "down"]
 
     large_font = pg.font.SysFont(None, 72)
     regular_font = pg.font.SysFont(None, 64)
@@ -54,7 +54,7 @@ class Tiles:
 
             for _ in range(num_tiles):
                 row_i, tile_i = int(random() * self.size), int(random() * self.size)
-                while self.tiles[row_i][tile_i] != None:
+                while self.tiles[row_i][tile_i] is not None:
                     row_i, tile_i = int(random() * self.size), int(random() * self.size)
                 self.tiles[row_i][tile_i] = 2 if random() < 0.9 else 4
 
@@ -142,7 +142,8 @@ class Tiles:
         for row_i, row in enumerate(self.tiles):
             for tile_i, tile in enumerate(row):
                 if tile:
-                    pg.draw.rect(self.display, self.tile_colours[tile],
+                    pg.draw.rect(
+                        self.display, self.tile_colours[tile],
                         (115 * tile_i + 15, 115 * row_i + 15, 100, 100)
                     )
 
@@ -156,7 +157,8 @@ class Tiles:
                     )
                     self.display.blit(tile_num, num_rect)
                 else:
-                    pg.draw.rect(self.display, (205, 192, 180),
+                    pg.draw.rect(
+                        self.display, (205, 192, 180),
                         (115 * tile_i + 15, 115 * row_i + 15, 100, 100)
                     )
 

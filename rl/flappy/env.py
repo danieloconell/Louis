@@ -3,90 +3,84 @@ from dataclasses import dataclass
 
 import pygame as pg
 
-# get pg ready!
+# get pygame ready!
 pg.init()
-
-
-@dataclass
-class bird:
-    x: int
-    y: int
-    angle: int
-    img: pg.Surface
 
 
 class Flappy:
     """Flappy environment.
 
     The aim of this environment is to survive as long as possible without
-    hitting a pipe, as I'm sure you know. This environment is rendered using
-    pg."""
+    hitting a pipe, as I'm sure you know."""
 
     ACTIONS = ["up", "stay"]
 
-    # colours
-    C_SKY = (66, 188, 244)
-    C_RED = (96, 148, 188)
-    C_GREEN = (58, 193, 46)
+    FPS = 60
+    WIN_WIDTH = 640
+    WIN_HEIGHT = 959
 
-    SCREEN_WIDTH = 640
-    SCREEN_HEIGHT = 1024 * SCREEN_WIDTH // 768
-    PIPE_DIFF = 240 * SCREEN_WIDTH // 768
-    BLOCK = SCREEN_WIDTH // 20
+    if pg.display.Info().current_w < 3000:
+        WIN_WIDTH //= 2
+        WIN_HEIGHT //= 2
+        INIT_GRAVITY = 0.76
+        VELOCTY_STEP = 16
+    GROUND_HEIGHT = WIN_WIDTH // 64 * 11
+    BACKGROUND_HEIGHT = WIN_HEIGHT - GROUND_HEIGHT
+
+    PIPE_DIFF = WIN_WIDTH // 64 * 20
+    PIPE_HEIGHT = WIN_WIDTH // 160 * 131
+    PIPE_WIDTH = WIN_WIDTH // 160 * 29
+    PIPE_OVERFLOW = PIPE_HEIGHT * 2 + PIPE_DIFF - BACKGROUND_HEIGHT
+
+    UPWARDS_BIRD_ANGLE = -35
+    MAX_BIRD_ANGLE = 90
+    ANGLE_STEP = 2.5
+    INIT_BIRD_ANGLE = 0
+    MAX_VELOCTY = -12
+    VELOCTY_STEP = 20
+    INIT_VELOCITY = 0
+    PIPE_STEP = 4
+    INIT_GRAVITY = 0.84
 
     def __init__(self):
-        # to init pg
-        self.pg_init = True
-        self.clock = pg.time.Clock()
+        # use smaller images for smaller screens
+        if pg.display.Info().current_w < 3000:
+            self.display = pg.display.set_mode([self.WIN_WIDTH, self.WIN_HEIGHT])
+            self.bg_img = pg.image.load("assets/background.small.gif").convert()
+            self.bird_img = pg.image.load("assets/bird.small.gif").convert_alpha()
+            self.top_pipe_img = pg.image.load("assets/pipe-top.small.gif").convert_alpha()
+            self.bot_pipe_img = pg.image.load("assets/pipe-bot.small.gif").convert_alpha()
+            self.ground_img = pg.image.load("assets/ground.small.gif").convert()
+        else:
+            self.display = pg.display.set_mode([self.WIN_WIDTH, self.WIN_HEIGHT])
+            self.bg_img = pg.image.load("assets/background.gif").convert()
+            self.bird_img = pg.image.load("assets/bird.gif").convert_alpha()
+            self.top_pipe_img = pg.image.load("assets/pipe-top.gif").convert_alpha()
+            self.bot_pipe_img = pg.image.load("assets/pipe-bot.gif").convert_alpha()
+            self.ground_img = pg.image.load("assets/ground.gif").convert()
+
         pg.display.set_caption("Flappy")
-        self.display = pg.display.set_mode(
-            [self.SCREEN_WIDTH, self.SCREEN_HEIGHT + 106]
-        )
 
-        self.bird = bird(
-            self.BLOCK * 4,
-            self.SCREEN_HEIGHT // 2,
-            0,
-            pg.transform.scale(
-                pg.image.load("assets/bird.gif").convert_alpha(), (75, 53)
-            )
-        )
+        self.pipe_top_mask = pg.mask.from_surface(self.top_pipe_img)
+        self.pipe_bot_mask = pg.mask.from_surface(self.bot_pipe_img)
 
-    def scale(self, pixels):
-        """Scale an amount of pixels based on the display's size.
-
-        Args:
-            pixels (int): Dimension of object to be scaled.
-
-        Returns:
-            Scaled dimension.
-        """
-        return pixels * self.SCREEN_WIDTH // 768
-
-    def rotate(self, image, angle):
-        """Rotate image by n degrees.
-
-        Args:
-            surface (pg.Surface): The surface that is to be rotated.
-            angle (int): Amount for image to be rotated
-        """
-        rotated_image = pg.transform.rotate(image, -angle)
-        return rotated_image
+        self.clock = pg.time.Clock()
+        self.bird = bird()
+        self.ground_loc = 0
 
     def reset(self):
         """Reset all the necessary variables for the environment."""
-        # reset vars
         self.done = False
-        self.bird.y = self.SCREEN_HEIGHT // 2
-        self.bird.angle = 0
-        self.gravity = 0.85
-        self.velocity = 0
+        self.bird.y = self.BACKGROUND_HEIGHT // 2
+        self.bird.angle = self.INIT_BIRD_ANGLE
+        self.gravity = self.INIT_GRAVITY
+        self.velocity = self.INIT_GRAVITY
 
         # reset pipes between
-        self.pipes_loc = [[self.SCREEN_WIDTH, randint(330, 721)]]
-
-        # reset ground
-        self.ground_loc = 1
+        rand_y = randint(0, self.PIPE_OVERFLOW)
+        self.pipes = [
+            (pipe(-rand_y), pipe(-rand_y + self.PIPE_HEIGHT + self.PIPE_DIFF))
+        ]
 
     def update(self):
         """Bring pipes and ground forward, add new pipe if nevessary, remove
@@ -94,124 +88,101 @@ class Flappy:
         velocity and stop game if bird at top or bottom."""
 
         # move pipes forward
-        for pipe in self.pipes_loc:
-            pipe[0] -= 4
+        for top_pipe, bot_pipe in self.pipes:
+            top_pipe.x -= self.PIPE_STEP
+            bot_pipe.x -= self.PIPE_STEP
 
         # if pipe halfway or more and only one pipe add new pipe
-        if len(self.pipes_loc) < 2 and self.pipes_loc[0][0] <= self.SCREEN_WIDTH / 2:
-            self.pipes_loc.append(
-                [self.pipes_loc[0][0] + self.SCREEN_WIDTH // 2 + 116, randint(330, 721)]
+        if self.pipes[-1][0].x <= self.WIN_WIDTH / 2:
+            rand_y = randint(0, self.PIPE_OVERFLOW)
+            self.pipes.append(
+                (pipe(-rand_y), pipe(-rand_y + self.PIPE_HEIGHT + self.PIPE_DIFF))
             )
 
+        if self.ground_loc <= -32:
+            self.ground_loc = 0
+        else:
+            self.ground_loc -= 4
+
         # remove first pipe if off screen
-        if self.pipes_loc[0][0] <= -116:
-            del self.pipes_loc[0]
-
-        # move ground forward
-        self.ground_loc -= 4
-
-        # remove ground if off screen and add new ground
-        if self.ground_loc <= -37:
-            self.ground_loc = 1
-
-        # limit bird rotation
-        if self.bird.angle <= -90 or self.bird.angle >= 90:
-            self.bird.angle = 90
+        if self.pipes[0][0].x <= -self.PIPE_WIDTH:
+            del self.pipes[0]
 
         # update velocity and bird position
         self.velocity += self.gravity
         self.bird.y += int(self.velocity)
 
-        # limit velocity to reduce drastic movement
-        if self.velocity > 16:
-            self.velocity = 16
-        elif self.velocity < -16:
-            self.velocity = -16
+        # limit bird angle
+        if self.bird.angle > self.MAX_BIRD_ANGLE:
+            self.bird.angle = self.MAX_BIRD_ANGLE
+
+        # limit velocity
+        if self.velocity < self.MAX_VELOCTY:
+            self.velocity = self.MAX_VELOCTY
 
     def render(self):
         """Render everything that needs to be seen."""
-        # setup pg on first run
-        if self.pg_init:
-            # set window width and height
-            # load and scale bird
-            # load and scale background
-            self.bg_img = pg.transform.scale(
-                pg.image.load("assets/background.gif").convert(),
-                (self.SCREEN_WIDTH, self.SCREEN_HEIGHT),
-            )
-            # load and scale top pipe
-            self.pipe_top_img = pg.transform.scale(
-                pg.image.load("assets/pipe-top.gif").convert_alpha(), (116, 523)
-            )
-            # load and scale bottom pipe
-            self.pipe_bottom_img = pg.transform.scale(
-                pg.image.load("assets/pipe-bottom.gif").convert_alpha(), (116, 523)
-            )
-            # load and scale ground
-            self.ground_img = pg.transform.scale(
-                pg.image.load("assets/ground.gif").convert_alpha(),
-                (self.SCREEN_WIDTH + 30, 106),
-            )
-            self.pg_init = False
-
         # draw background
         self.display.blit(self.bg_img, (0, 0))
 
         # pipes
-        for pipe in self.pipes_loc:
-            # bottom pipe
-            self.display.blit(self.pipe_bottom_img, (pipe[0], pipe[1]))
-            # top pipe
-            self.display.blit(
-                self.pipe_top_img, (pipe[0], pipe[1] - self.PIPE_DIFF - 523)
-            )
-
-        # ground
-        # self.display.blit(self.ground_img, (self.ground_loc, self.SCREEN_HEIGHT))
+        for top_pipe, bot_pipe in self.pipes:
+            self.display.blit(self.top_pipe_img, (top_pipe.x, top_pipe.y))
+            self.display.blit(self.bot_pipe_img, (bot_pipe.x, bot_pipe.y))
 
         # rotate bird
-        rotated_bird = self.rotate(self.bird.img, self.bird.angle)
+        rotated_bird = pg.transform.rotate(self.bird_img, -self.bird.angle)
         # create rectange from the bird
         rotated_bird_rect = rotated_bird.get_rect(center=(self.bird.x, self.bird.y))
 
-        # create masks to check for collision
+        # create mask to check for collision between bird and pipes
         bird_mask = pg.mask.from_surface(rotated_bird)
-        pipe_top_mask = pg.mask.from_surface(self.pipe_top_img)
-        pipe_bottom_mask = pg.mask.from_surface(self.pipe_bottom_img)
 
-        x_diff = rotated_bird_rect.x - self.pipes_loc[0][0]
-        top_y_diff = rotated_bird_rect.y - self.pipes_loc[0][1] + self.PIPE_DIFF + 523
-        bot_y_diff = rotated_bird_rect.y - self.pipes_loc[0][1]
+        x_diff = rotated_bird_rect.x - self.pipes[0][0].x
+        top_y_diff = rotated_bird_rect.y - self.pipes[0][1].y
+        bot_y_diff = rotated_bird_rect.y - self.pipes[0][0].y
 
-        overlap_top = pipe_top_mask.overlap(bird_mask, (x_diff, top_y_diff))
-        overlap_bottom = pipe_bottom_mask.overlap(bird_mask, (x_diff, bot_y_diff))
+        overlap_top = self.pipe_top_mask.overlap(bird_mask, (x_diff, top_y_diff))
+        overlap_bot = self.pipe_bot_mask.overlap(bird_mask, (x_diff, bot_y_diff))
+        overlap_bot = overlap_top = None
 
         # if there is a collision or bird at top or bottom of screen, gameover
-        if overlap_top or overlap_bottom:
+        # otherwise render frame
+        if overlap_top or overlap_bot:
             self.done = True
-        elif rotated_bird_rect.y >= self.SCREEN_HEIGHT - 50:
+        elif rotated_bird_rect.bottomright[1] >= self.BACKGROUND_HEIGHT:
             self.done = True
         elif (
-            rotated_bird_rect.topright[0] >= self.pipes_loc[0][0]
+            rotated_bird_rect.topright[0] >= self.pipes[0][0].x
             and rotated_bird_rect.y <= 0
         ):
             self.done = True
         else:
             self.display.blit(rotated_bird, rotated_bird_rect)
+            self.display.blit(self.ground_img, (self.ground_loc, self.BACKGROUND_HEIGHT))
             pg.display.update()
 
     def make_action(self, action):
         """Move bird."""
         if action == "up":
-            self.bird.angle = -35
-            self.velocity += -20
+            self.bird.angle = self.UPWARDS_BIRD_ANGLE
+            self.velocity -= self.VELOCTY_STEP
         elif action == "stay":
-            self.bird.angle += 2
+            self.bird.angle += self.ANGLE_STEP
 
         self.update()
 
-        self.clock.tick(60)
+        self.clock.tick(self.FPS)
 
-    def get_screen(self):
-        """Return the game display as an image."""
-        return pg.surfarray.array3d(pg.display.get_surface())
+
+@dataclass
+class pipe:
+    y: int
+    x: int = Flappy.WIN_WIDTH
+
+
+@dataclass
+class bird:
+    x: int = Flappy.WIN_WIDTH * 0.2
+    y: int = Flappy.BACKGROUND_HEIGHT // 2
+    angle: int = 0

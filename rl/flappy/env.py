@@ -24,7 +24,9 @@ class Flappy:
         WIN_HEIGHT //= 2
         INIT_GRAVITY = 0.76
         VELOCTY_STEP = 16
+
     GROUND_HEIGHT = WIN_WIDTH // 64 * 11
+    GROUND_WIDTH = WIN_WIDTH // 160 * 8
     BACKGROUND_HEIGHT = WIN_HEIGHT - GROUND_HEIGHT
 
     PIPE_DIFF = WIN_WIDTH // 64 * 20
@@ -39,7 +41,7 @@ class Flappy:
     MAX_VELOCTY = -12
     VELOCTY_STEP = 20
     INIT_VELOCITY = 0
-    PIPE_STEP = 4
+    UPDATE_STEP = 4
     INIT_GRAVITY = 0.84
 
     def __init__(self):
@@ -48,8 +50,12 @@ class Flappy:
             self.display = pg.display.set_mode([self.WIN_WIDTH, self.WIN_HEIGHT])
             self.bg_img = pg.image.load("assets/background.small.gif").convert()
             self.bird_img = pg.image.load("assets/bird.small.gif").convert_alpha()
-            self.top_pipe_img = pg.image.load("assets/pipe-top.small.gif").convert_alpha()
-            self.bot_pipe_img = pg.image.load("assets/pipe-bot.small.gif").convert_alpha()
+            self.top_pipe_img = pg.image.load(
+                "assets/pipe-top.small.gif"
+            ).convert_alpha()
+            self.bot_pipe_img = pg.image.load(
+                "assets/pipe-bot.small.gif"
+            ).convert_alpha()
             self.ground_img = pg.image.load("assets/ground.small.gif").convert()
         else:
             self.display = pg.display.set_mode([self.WIN_WIDTH, self.WIN_HEIGHT])
@@ -89,8 +95,8 @@ class Flappy:
 
         # move pipes forward
         for top_pipe, bot_pipe in self.pipes:
-            top_pipe.x -= self.PIPE_STEP
-            bot_pipe.x -= self.PIPE_STEP
+            top_pipe.x -= self.UPDATE_STEP
+            bot_pipe.x -= self.UPDATE_STEP
 
         # if pipe halfway or more and only one pipe add new pipe
         if self.pipes[-1][0].x <= self.WIN_WIDTH / 2:
@@ -99,11 +105,7 @@ class Flappy:
                 (pipe(-rand_y), pipe(-rand_y + self.PIPE_HEIGHT + self.PIPE_DIFF))
             )
 
-        if self.ground_loc <= -32:
-            self.ground_loc = 0
-        else:
-            self.ground_loc -= 4
-
+        self.ground_loc -= self.UPDATE_STEP
         # remove first pipe if off screen
         if self.pipes[0][0].x <= -self.PIPE_WIDTH:
             del self.pipes[0]
@@ -144,7 +146,7 @@ class Flappy:
 
         overlap_top = self.pipe_top_mask.overlap(bird_mask, (x_diff, top_y_diff))
         overlap_bot = self.pipe_bot_mask.overlap(bird_mask, (x_diff, bot_y_diff))
-        overlap_bot = overlap_top = None
+        # overlap_bot = overlap_top = None
 
         # if there is a collision or bird at top or bottom of screen, gameover
         # otherwise render frame
@@ -159,7 +161,13 @@ class Flappy:
             self.done = True
         else:
             self.display.blit(rotated_bird, rotated_bird_rect)
-            self.display.blit(self.ground_img, (self.ground_loc, self.BACKGROUND_HEIGHT))
+            # put ground images side by side for scrolling effect
+            rel_x = self.ground_loc % self.GROUND_WIDTH
+            for some in range(-1, self.WIN_WIDTH // self.GROUND_WIDTH):
+                self.display.blit(
+                    self.ground_img,
+                    (rel_x + some * self.GROUND_WIDTH, self.BACKGROUND_HEIGHT),
+                )
             pg.display.update()
 
     def make_action(self, action):

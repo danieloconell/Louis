@@ -1,4 +1,5 @@
 from random import random, choice
+from contextlib import contextmanager
 
 import pygame as pg
 
@@ -7,7 +8,7 @@ pg.init()
 
 class Tiles:
 
-    tile_colours = {
+    TILE_COLOURS = {
         2: (238, 228, 218),
         4: (237, 224, 200),
         8: (242, 177, 120),
@@ -19,11 +20,8 @@ class Tiles:
         512: (237, 201, 80),
         1024: (237, 197, 63),
         2048: (237, 194, 46),
-        4096: (60, 58, 50),
-        8192: (60, 58, 50),
-        16384: (60, 58, 50),
-        32768: (60, 58, 50)
     }
+    MAX_COLOUR = (60, 58, 50)
 
     ACTIONS = ["left", "right", "up", "down"]
 
@@ -60,7 +58,10 @@ class Tiles:
 
         @property
         def full(self):
-            if len([tile for row in self.tiles for tile in row if tile]) == self.size ** 2:
+            if (
+                len([tile for row in self.tiles for tile in row if tile])
+                == self.size ** 2
+            ):
                 for row_i, row in enumerate(self.tiles):
                     for tile_i, tile in enumerate(row):
                         if tile:
@@ -70,7 +71,10 @@ class Tiles:
                                 return False
                             elif row_i != 0 and tile == self.tiles[row_i - 1][tile_i]:
                                 return False
-                            elif row_i != self.size - 1 and tile == self.tiles[row_i + 1][tile_i]:
+                            elif (
+                                row_i != self.size - 1
+                                and tile == self.tiles[row_i + 1][tile_i]
+                            ):
                                 return False
                 return True
 
@@ -94,7 +98,7 @@ class Tiles:
     def __init__(self, size=4):
         self.tiles = self.board(size=size)
         self.memory = self.board(size=size)
-        self.tiles.last_move = [list(row) for row in self.tiles.tiles]
+        self.tiles.last_move = [row.copy() for row in self.tiles.tiles]
         self.pg_init = True
         self.is_sim = False
 
@@ -124,10 +128,10 @@ class Tiles:
         elif right:
             return self.slide(self.merge(self.slide(row, right=True)), right=True)
 
-    def start_simulation(self):
+    @contextmanager
+    def simulate(self):
         self.is_sim = True
-
-    def end_simulation(self):
+        yield
         self.is_sim = False
 
     def render(self):
@@ -143,8 +147,9 @@ class Tiles:
             for tile_i, tile in enumerate(row):
                 if tile:
                     pg.draw.rect(
-                        self.display, self.tile_colours[tile],
-                        (115 * tile_i + 15, 115 * row_i + 15, 100, 100)
+                        self.display,
+                        self.TILE_COLOURS.get(tile, self.MAX_COLOUR),
+                        (115 * tile_i + 15, 115 * row_i + 15, 100, 100),
                     )
 
                     font_colour = (249, 246, 242) if tile > 4 else (117, 110, 101)
@@ -158,8 +163,9 @@ class Tiles:
                     self.display.blit(tile_num, num_rect)
                 else:
                     pg.draw.rect(
-                        self.display, (205, 192, 180),
-                        (115 * tile_i + 15, 115 * row_i + 15, 100, 100)
+                        self.display,
+                        (205, 192, 180),
+                        (115 * tile_i + 15, 115 * row_i + 15, 100, 100),
                     )
 
         pg.display.update()
@@ -175,7 +181,7 @@ class Tiles:
                 self.sim_done = True
             return False
 
-        initial_tiles = [list(row) for row in tiles]
+        initial_tiles = [row.copy() for row in tiles]
         self.make_action(action)
         if tiles.tiles == initial_tiles:
             tiles.tiles = initial_tiles
@@ -210,7 +216,7 @@ class Tiles:
             self.done = True
             return
 
-        self.prev_state = [list(row) for row in tiles.tiles]
+        self.prev_state = [row.copy() for row in tiles.tiles]
 
         if action == "up":
             for row_i in range(self.tiles.size):
@@ -237,7 +243,7 @@ class Tiles:
         if self.is_sim:
             self.sim_done = False
             self.sim_score = self.score
-            self.memory.tiles = [list(row) for row in self.tiles.tiles]
+            self.memory.tiles = [row.copy() for row in self.tiles.tiles]
         else:
             self.tiles.reset()
             self.done = False

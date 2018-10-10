@@ -5,7 +5,7 @@ import pygame as pg
 from env import Tiles
 
 env = Tiles()
-sims = 100
+n_sims = 100
 
 env.reset()
 while not env.done:
@@ -17,15 +17,14 @@ while not env.done:
             pg.quit()
             quit()
 
-    env.start_simulation()
-    for sim in range(sims):
-        env.reset()
-        start_move = choice(env.ACTIONS)
-        env.make_action(start_move)
-        while not env.sim_done:
-            env.random_action()
-        scores[start_move].append(env.sim_score)
-    env.end_simulation()
+    with env.simulate():
+        for _ in range(n_sims):
+            env.reset()
+            start_move = choice(env.ACTIONS)
+            env.make_action(start_move)
+            while not env.sim_done:
+                env.random_action()
+            scores[start_move].append(env.sim_score)
 
     for action in scores:
         scores[action] = sum(scores[action]) / len(scores[action])

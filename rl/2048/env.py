@@ -58,10 +58,7 @@ class Tiles:
 
         @property
         def full(self):
-            if (
-                len([tile for row in self.tiles for tile in row if tile])
-                == self.size ** 2
-            ):
+            if len(self) == self.size ** 2:
                 for row_i, row in enumerate(self.tiles):
                     for tile_i, tile in enumerate(row):
                         if tile:
@@ -93,7 +90,7 @@ class Tiles:
                 yield tile
 
         def __len__(self):
-            return len(self.tiles)
+            return len([tile for row in self.tiles for tile in row if tile])
 
     def __init__(self, size=4):
         self.tiles = self.board(size=size)

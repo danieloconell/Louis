@@ -5,6 +5,7 @@ import pygame as pg
 from env import Tiles
 
 env = Tiles()
+print(len(env.tiles))
 n_sims = 100
 
 env.reset()

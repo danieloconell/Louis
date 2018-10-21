@@ -1,6 +1,6 @@
 # Louis
 
-This is a showcase of current machine learning and what it can achieve.
+This is a small sample of simple projects based on machine learning.
 
 ## Content
 - Image classification (Google's inception)
